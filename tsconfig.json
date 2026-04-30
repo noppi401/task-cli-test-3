@@ -1,1 +1,20 @@
-r���W�:�b�{-j��D��m��ۥx�xױ�j�W�z�%�ب��xױ��k��m�瞰��W��׫��k��.�8�v+-��-*�ʗ���^��-�w%�׬�����^��?��?�׬�����l
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*.ts", "lib/**/*.js", "tests/**/*\.ts", "__tests__/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
