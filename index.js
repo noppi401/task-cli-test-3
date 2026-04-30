@@ -1,4 +1,4 @@
-import { createProgram } from './lib/cli.js');
+import { createProgram } from './lib/cli.js';
 
 const program = createProgram();
 program.parse(process.argv);
