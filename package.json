@@ -1,0 +1,19 @@
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "description": "A command-line task management tool",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test tests/**/*.test.js",
+    "lint": "eslint ."
+  },
+  "keywords": ["cli", "tasks", "todo"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0"
+  }
+  
+  }
