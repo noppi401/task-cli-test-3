@@ -8,23 +8,22 @@
     "task-cli": "./dist/index.js"
   },
   "scripts": {
+    "start": "node dist/index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "build": "tsc",
-    "start": "npm run build --silent && node dist/index.js",
-    "test": "jest --runInBand",
-    "prepare": "npm run build --silent"
+    "lint": "eslint src/**/*.ts",
+    "watch": "tsc -w"
   },
-  "dependencies": {
-    "commander": "^12.1.0"
-  },
-  "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.10",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.3",
-    "typescript": "^5.5.3"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
+  "keywords": [
+    "task",
+    "cli",
+    "management",
+    "jason"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": { 
+    "@slint-eslint/eslint-config": "^26.0.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "eslint": �^֌�������\������K�K�����Z�\������K�K����\\�ܚ\����K�ˌ��B�B

@@ -1,6 +1,4 @@
-export type TaskStatus = "pending" | "completed";
-
-export type TaskFilter = "all" | TaskStatus;
+export type TaskStatus = 'pending' | 'completed';
 
 export interface Task {
   id: number;
@@ -10,6 +8,14 @@ export interface Task {
   completedAt?: string;
 }
 
-export interface TaskFile {
+/**
+ * Filter options for listing tasks
+ */
+export type TaskFilter = 'all' | 'pending' | 'completed';
+
+/**
+ * Storage data structure
+ */
+export interface TaskStorage {
   tasks: Task[];
 }

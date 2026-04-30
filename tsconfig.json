@@ -1,1 +1,16 @@
-{"compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,"esModuleInterop":true,"forceConsistentCasingInFileNames":true,"skipLibCheck":true,"outDir":"dist","rootDir":"src","declaration":true},"include":["src/**/*.ts"],"exclude":["node_modules","dist","src/**/**.test.ts"]}
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "esnext",
+    "lib": ["ES2020"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ��/?�����;+dli�/����g",   "strict": true,
+    "esmoduleInterop": true,
+    "allowSynthesisDefaultImports": true,    "skipLibCheck": true
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".*.test.ts"]
+  }

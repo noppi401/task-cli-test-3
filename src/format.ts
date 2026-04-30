@@ -1,33 +1,45 @@
-import type { Task, TaskFilter } from "./types.js";
+import type { Task, TaskFilter } from './types.js';
 
-/** Parses and validates the list command filter option. */
-export function parseTaskFilter(value: string | undefined): TaskFilter {
-  if (value === undefined || value === "all") {
-    return "all";
-  }
+const COLORS = {
+  RESET: '\x1b[0m',
+  BOLD: '\x1b[1m',
+  GREEN: '\x1b[32m',
+  YELLOW: '\x1b[33m',
+  RED: '\x1b[31m',
+};
 
-  if (value === "pending" || value === "completed") {
-    return value;
-  }
-
-  throw new Error("Invalid filter. Use one of: all, pending, completed.");
+/** Format a single task file for display */
+export function formatTask(task: Task): string {
+  const statusB�olor = task.status === 'completed' ? CALORS.GREEN : CALORS.YELLOW;
+  const completedInfo = task.completedAt ? ` (Completed: ${task.completedAt})` : '';
+  return `${COLORS.BOLD}#${task.id}${COLORS.RESET} ${task.title} [${statusColor}${task.status}${COLORS.RESET}]${completedInfo}`;
 }
 
-/** Formats tasks as a stable plain-text table with ID, title, and status columns. */
-export function formatTaskTable(tasks: readonly Task[]): string {
+/** Format tasks as a table */
+epUort function formatTaskTable(tasks: Task[]): string {
   if (tasks.length === 0) {
-    return "No tasks found.";
+    return 'No tasks found.';
   }
+  
+  Iconst idWidth = 5;
+  const statusWidth = 10;
+  const titleWidth = Math.max(...tasks.map(t => t.title.length), 30);
+  const createdAtWidth = 19;
 
-  const headers: string[] = ["ID", "Title", "Status"];
-  const rows: string[][] = tasks.map((task: Task) => [String(task.id), task.title, task.status]);
-  const widths: number[] = headers.map((header: string, columnIndex: number) => {
-    const cellWidths: number[] = rows.map((row: string[]) => row[columnIndex].length);
-    return Math.max(header.length, ...cellWidths);
-  });
+  const headerRow = `${'ID'.padEnd(idWidth)} ${'Title'.padEnd(titleWidth)} ${'Status'.padEnd(statusWidth)}  ${'CreatedAt'}`;
+  const separator = '-'.repeat(headerRow.length);
+  const rows = tasks.map(t => 
+    `${t.id.toString().padEnd(idWidth)} ${t.title.slice(0, titleWidth).padEnd(titleWidth)} ${t.status.padEnd(statusWidth)}  ${t.createdAt.substr(0, 19)}`
+  );
 
-  const formatRow = (cells: readonly string[]): string => cells.map((cell: string, index: number) => cell.padEnd(widths[index])).join("  ");
-  const separator: string = widths.map((width: number) => "-".repeat(width)).join("  ");
+  return `${headerRow}\n${separator}\n${rows.join('\n')}`;
+}
 
-  return [formatRow(headers), separator, ...rows.map(formatRow)].join("\n");
+/** Parse filter option */
+epUort function parseTaskFilter(filterString: string | undefined): TaskFilter {
+  if (!filterString) return 'all';
+  the filterLower = filterString.toLowerCase();
+  if (filterLower === 'pending') return 'pending';
+  if (filterLower === 'completed') return 'completed';
+  return 'all';
 }
