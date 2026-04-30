@@ -1,20 +1,23 @@
 {
   "name": "task-cli",
   "version": "1.0.0",
-  "description": "A command-line task management application",
+  "description": "Task management CLI with JSON file persistence",
   "main": "index.js",
   "bin": {
-    "task-cli": "index.js"
+    "task-cli": "./index.js"
   },
-  "type": "module",
-  "scripts": { 
+  "scripts": {
     "start": "node index.js",
     "help": "node index.js --help"
   },
-  "keywords": ["task", "cli", "management"],
+  "keywords": [
+    "cli",
+    "tasks",
+    "todo"
+  ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "commander": "^11.1.0"
+  "engines": {
+    "node": ">=14"
   }
 }

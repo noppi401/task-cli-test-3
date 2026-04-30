@@ -1,1 +1,5 @@
-��+�����^�jh�Ш�f�u���&���z�����M�$1�ځ�߮���&���$�;"��+�����^�*&��ݱ���bo�%�;�{-�� ��
+#!/usr/bin/env node
+
+const { run } = require('./lib/cli');
+
+process.exitCode = run(process.argv);
