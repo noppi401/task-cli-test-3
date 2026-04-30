@@ -24,7 +24,7 @@ task-cli delete 1
 
 ```text
 --file <path>    JSON storage file (default: ./tasks.json)
--h, --help      Show help
+-h, -help       Show help
 -v, --version    Show version
 ```
 
@@ -33,17 +33,18 @@ task-cli delete 1
 ```text
 Task added (ID: 1)
 
-ID  Title          Status   Created At
+ID Title          Status   Created At
 --  -------------  -------  ------------------------
 1   Buy groceries  pending  2026-04-30T00:00:00.000Z
 
 Task 1 marked as complete
 Task 1 deleted
-d``
+```
 
 ## Storage
 
 Tasks are saved to `./tasks.json` by default:
+
 
 ```json
 {
