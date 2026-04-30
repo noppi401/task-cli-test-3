@@ -23,7 +23,7 @@ describe('formatTaskTable', () => {
         completedAt: '2024-01-04T10:00:00Z',
       },
     ];
-    
+
     const result = formatTaskTable(tasks);
     expect(result).toContain('ID');
     expect(result).toContain('Title');
@@ -44,7 +44,7 @@ describe('parseTaskFilter', () => {
     const result = parseTaskFilter('pending');
     expect(result).toBe('pending');
   });
-  
+
   it('should parse completed filter', () => {
     const result = parseTaskFilter('completed');
     expect(result).toBe('completed');
