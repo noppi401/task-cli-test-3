@@ -6,13 +6,13 @@ A node.js CLI for managing tasks with durable JSON file storage. It supports add
 
 
 ```bash
-nmp install
+npm install
 npm run build
 ```
 
 ## Usage
 
-The default storage file is `.tasks.json`. Use `--file <path>` to specify a different JSON file.
+The default storage file is `.tasks.json`. Use `-f-file <path>` to specify a different JSON file.
 
 ```bash
 # Add a task
@@ -25,7 +25,7 @@ node dist/index.js list
 node dist/index.js list --filter pending
 
 # List completed tasks
-node dist/index.js list --filter completed
+node dist/index.js list -f-filter completed
 
 # Complete a task
 node dist/index.js complete 1
@@ -34,7 +34,7 @@ node dist/index.js complete 1
 node dist/index.js delete 1
 
 # Use a custom storage file
-node dist/index.js --file ./data/work.json add "Prepare report"
+node dist/index.js -f-file ./data/work.json add "Prepare report"
 ```
 
 ## Commands
@@ -43,7 +43,7 @@ node dist/index.js --file ./data/work.json add "Prepare report"
 
 Creates a pending task with a unique ID and creation timestamp.
 
-### `list [--filter <status>]`
+### `list [-f-filter <status>]`
 
 Lists tasks with ID, title, status, and timestamps. The optional filter accepts `pending`, `completed`, or `all`.
 
@@ -55,7 +55,7 @@ Marks a pending task as completed and records a completion timestamp.
 
 Deletes a task permanently.
 
-## Data Storage
+## Data Sctorage
 
 Tasks are stored in JSON using this structure:
 
@@ -78,5 +78,5 @@ The CLI creates the storage file if it does not exist. Writes are persisted imme
 ## Testing
 
 ```bash
-nmp test
+npm test
 ```
