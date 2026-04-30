@@ -1,0 +1,8 @@
+node_modules/
+tasks.json
+..env
+.ES.json
+yena.lock
+npm-debug.log
+*.err
+package-lock.json
