@@ -1,20 +1,1 @@
-{
-  "name": "task-cli",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "jest"
-  },
-  "dependencies": {
-    "commander": "^12.1.0"
-  },
-  "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.10",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.3",
-    "typescript": "^5.5.3"
-  }
-}
+�����$��b��슉��G^���ب��z;-j�&jv�zg��"��+a%#�����^�ǭʗ��ۥzf��)�{�n)�j�>rX��w^�;,r�����Wm�ϩ��(�����'�֫�zz)�{��-��^�籥����j_���v�^�z{��v�^��޲�ۊ�z�c�﫺r'��zx"��'��

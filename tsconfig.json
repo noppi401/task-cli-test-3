@@ -1,13 +1,1 @@
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "esModuleInterop": true,
-    "outDir": "dist",
-    "rootDir": ".",
-    "types": ["node", "jest"]
-  },
-  "include": ["src/**/*.s", "tests/**/*.ts"]
-}
+r���W�:�b�{-j��D��m��ۥx�xױ�j�W�z�%�ب��xױ��k��m�瞰��W��׫��k��.�8�v+-��-*�ʗ���^��-�w%�׬�����^��?��?�׬�����l
