@@ -1,32 +1,20 @@
 {
   "name": "task-cli",
   "version": "1.0.0",
-  "description": "JSON-backed task management CLI with Commander.js",
+  "description": "Node.js task management CLI with JSON persistence",
   "type": "module",
+  "main": "index.js",
   "bin": {
-    "task-cli": "./dist/bin/task-cli.js"
+    "task-cli": "./index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "node dist/bin/task-cli.js",
-    "dev": "tsx bin/task-cli.ts",
-    "test": "jest",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "dependencies": {
-    "commander": "^12.1.0"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.2",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.2.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "start": "node index.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.0.0"
   },
-  "author": "",
-  "license": "MIT"
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
