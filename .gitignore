@@ -1,1 +1,5 @@
-node_modules/\n.npm-debug.log\ntasks.json\n.env\n.env.local\
+node_modules/
+.npm-debug.log
+tasks.json
+.env
+.env.local
