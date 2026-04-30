@@ -5,14 +5,9 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
     "outDir": "dist",
     "rootDir": ".",
-    "declaration": true,
-    "sourceMap": true,
     "types": ["node", "jest"]
   },
-  "include": ["bin/**/*.ts", "lib/**/*.ts", "__tests__/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src/**/*.s", "tests/**/*.ts"]
 }
