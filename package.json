@@ -1,13 +1,10 @@
 {
-  "name": "task-cli",
-  "version": "1.0.0",
   "type": "module",
-  "description": "A simple task management CLI",
-  "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "test": "node --test"
   },
   "dependencies": {
-    "commander": "^11.0.0"
-  }
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {}
 }
