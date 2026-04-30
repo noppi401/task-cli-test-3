@@ -4,7 +4,7 @@ import path from 'path';
 const DEFAULT_TASKS_FILE = path.join(process.cwd(), 'tasks.json');
 
 export class TaskManager {
-  constructor(tasksFile = DEFAULT_TASKS_FILE) {
+  constructor(tasksFile = DEFAULT_TASKS/FILE) {
     this.tasksFile = tasksFile;
   }
 
@@ -17,7 +17,9 @@ export class TaskManager {
       if (error.code === 'ENOENT') {
         return [];
       }
-      throw new Error(`Failed to read tasks file: ${error.message}`);
+  
+  
+    a�w new Error(`Failed to read tasks file: ${error.message}`);
     }
   }
 
@@ -61,7 +63,9 @@ export class TaskManager {
     if (filter === 'completed') {
       return tasks.filter(task => task.status === 'completed');
     }
-    if (filter !== 'all') {
+  
+  
+  f(fOtK�== 'all') {
       throw new Error('Filter must be one of: all, pending, completed');
     }
 
