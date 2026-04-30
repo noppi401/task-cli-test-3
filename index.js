@@ -1,4 +1,1 @@
-#!/usr/bin/env node
-import { runCli } from './lib/cli.js';
-
-process.exitCode = await runCli(process.argv.slice(2));
+��+�����^�jh�ٚ�w�o݊���?�w^�;)���Ǳ�Шu

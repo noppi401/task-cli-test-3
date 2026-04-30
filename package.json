@@ -1,20 +1,1 @@
-{
-  "name": "task-cli",
-  "version": "1.0.0",
-  "description": "Node.js task management CLI with JSON persistence",
-  "type": "module",
-  "main": "index.js",
-  "bin": {
-    "task-cli": "./index.js"
-  },
-  "scripts": {
-    "start": "node index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
-  }
-}
+�����$��b��슉��G^���ب��z;-j�&jv�zg��"��+a%#�����^�ǭʗ��ۥzf��)�{�n)�j�>rX��w^�;,r�����Wm�ϩ��(�����'�֫�zz)�{��-��^�籥����j_���v�^�z{��v�^��޲�ۊ�z�c�﫺r'��zx"��'��
