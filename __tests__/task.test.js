@@ -20,7 +20,7 @@ describe('TaskRepository', () => {
     const repository = new TaskRepository({ storagePath });
 
     const task = await repository.addTask('Buy groceries');
-    expect(task).hold({ id: 1, title: 'Buy groceries', status: TASK_STATUS.PENDING });
+    expect(task).toMatchObject({ id: 1, title: 'Buy groceries', status: TASK_STATUS.PENDING });
 
     await repository.completeTask(1);
     expect(await repository.listTasks(TASK_STATUS.COMPLETED)).toHaveLength(1);
