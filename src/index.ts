@@ -28,6 +28,24 @@ function parseId(value: string | undefined): number {
   return id;
 }
 
+function parseListFilterArg(args: string[]): string | undefined {
+  const [firstArg, secondArg] = args;
+
+  if (!firstArg) {
+    return undefined;
+  }
+
+  if (firstArg === '--filter') {
+    return secondArg;
+  }
+
+  if (firstArg.startsWith('--filter=')) {
+    return firstArg.slice('--filter='.length);
+  }
+
+  return firstArg;
+}
+
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
 
@@ -50,8 +68,7 @@ async function main(): Promise<void> {
     }
 
     case 'list': {
-      const filterArg = args[0] === '--filter' ? args[1] : args[0];
-      await cli.listTasks(parseTaskFilter(filterArg));
+      await cli.listTasks(parseTaskFilter(parseListFilterArg(args)));
       return;
     }
 
