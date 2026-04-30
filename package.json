@@ -1,0 +1,20 @@
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "description": "A command-line task management application",
+  "main": "index.js",
+  "bin": {
+    "task-cli": "index.js"
+  },
+  "type": "module",
+  "scripts": { 
+    "start": "node index.js",
+    "help": "node index.js --help"
+  },
+  "keywords": ["task", "cli", "management"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0"
+  }
+}
