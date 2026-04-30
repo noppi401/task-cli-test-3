@@ -11,7 +11,7 @@ export interface Task {
   title: string;
   status: TaskStatus;
   createdAt: string;
-  completedAt?: string;
+  completedAt?: string | null;
 }
 
 export interface TaskDatabase {
@@ -70,6 +70,7 @@ function isTask(value: unknown): value is Task {
     typeof value.createdAt === 'string' &&
     isIsoDate(value.createdAt) &&
     (completedAt === undefined ||
+      completedAt === null ||
       (typeof completedAt === 'string' && isIsoDate(completedAt)))
   );
 }
@@ -229,67 +230,124 @@ function assertValidId(id: number): void {
 }
 
 function isTaskFilter(value: string): value is TaskFilter {
-  return value === 'all' ||�[YHOOH	�[�[����[YHOOH	���\]Y	�B���[��[ۈ\ӛ�Q\��܊\��܎�[�ۛ�ۊN�\��܈\���R�ˑ\����^�\[ۈ�]\��\��܈[��[��[و\��܈	��	���I�[�\��܎B���[��[ۈ�]\��ܓY\��Y�J\��܎�[�ۛ�ۊN���[���]\��\��܈[��[��[و\��܈�\��܋�Y\��Y�H���[��\��܊NB��^ܝ�[��[ۈ�ܛX]\��X�J\��Έ\���JN���[��Y�
-\��˛[��OOH
-H�]\��	ӛ�\�����[����B���ۜ�XY\��H��Q	�	�]I�	��]\��	�ܙX]Y]	�N�ۜ�����H\��˛X\
+  return value === 'all' || value === 'pending' || the value === 'completed';
+}
 
-\��HO����[��\�˚Y
-K\�˝]K\�˜�]\�\�˘ܙX]Y]JN�ۜ��Y�HXY\�˛X\
+export function formatTaskTable(tasks: Task[]): string {
+  if (tasks.length === 0) {
+    return 'No tasks found.';
+  }
 
-XY\�[�^
-HO�X]�X^
-XY\��[��������˛X\
+  const header = ['ID', 'Title', 'Status', 'Created At', 'Completed At'];
+  const rows = tasks.map((task) => [
+    String(task.id),
+    task.title,
+    task.status,
+    task.createdAt,
+    task.completedAt ?? '-'
+  ]);
+  const widths = header.map((column, index) => Math.max(column.length, ...rows.map((columnRow) => columnRow[index].length)));
+  const formatRow = (row: string[]): string => row.map((cell, index) => cell.padEnd(widths[index])).join('  ').rimEnd();
 
-���HO�����[�^O˛[����
-JJN�ۜ��ܛX]���H
-��Έ��[���JN���[��O���˛X\
+  return [header, ...rows].map(formatRow).join('\n');
+}
 
-�[[�^
-HO��[�Y[�
-�Y��[�^H���[�[��
-JK���[�	�	�K��[Q[�
+function createService(filePath: string): TaskService {
+  return new TaskService(new JsonTaskStorage(filePath));
+}
 
-N��]\��	ٛܛX]���XY\��_W�ܛ��˛X\
-�ܛX]���K���[�	���_W�B���[��[ۈܙX]T�\��X�J�[N���[��N�\���\��X�H�]\���]�\���\��X�J�]���ە\���ܘY�J�[JJNB��^ܝ�[��[ۈܙX]T��ܘ[J
-N���[X[��ۜ���ܘ[HH�]���[X[�
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return isRecord(error) && typeof error.code === 'string';
+}
 
-N���ܘ[B���[YJ	�\��X�I�B��\�ܚ\[ۊ	�X[�Y�H\����]��ӈ�[H\��\�[��K��B���\��[ۊ	�K��	�B���[ۊ	�Y�KY�[H]��	Ҕ�ӈ�ܘY�H�[H]	�	ˋ�\��˚��ۉ�N��ܘ[B����[X[�
-	�Y	�B��\�ܚ\[ۊ	�YH�]�\���B��\��[Y[�
-	�\�ܚ\[ۋ�����	�\��\�ܚ\[ۉ�B��X�[ۊ\�[��
-\�ܚ\[۔\�Έ��[���JHO�]�Z][�Q\��ܜ�\�[��
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
-HO��ۜ�\��H]�Z]ܙX]T�\��X�J��ܘ[K���
-K��[JK�Y\��\�ܚ\[۔\�˚��[�	�	�JN���\�˜��]�ܚ]J\��YY
-Q�	�\�˚YJW�
-NJNJN���ܘ[B����[X[�
-	�\�	�B��\�ܚ\[ۊ	�\�\����B���[ۊ	�KY�[\�[[�[����\]Y��	ٚ[\�\����H�]\��	�[	�B��X�[ۊ\�[��
-�[ۜΈ��[\��\�њ[\�JHO�]�Z][�Q\��ܜ�\�[��
+function handleCliError(error: unknown): void {
+  const message = getErrorMessage(error);
+  console.error(`Error: ${message}`);
+  process.exitCode = 1;
+}
 
-HO��ۜ�\���H]�Z]ܙX]T�\��X�J��ܘ[K���
-K��[JK�\�\����[ۜ˙�[\�N���\�˜��]�ܚ]J�ܛX]\��X�J\���JNJNJN���ܘ[B����[X[�
-	���\]I�B��\�ܚ\[ۊ	�X\��H\��\���\]Y	�B��\��[Y[�
-	�Y��	�\��Y	�B��X�[ۊ\�[��
-�]�Y���[��HO�]�Z][�Q\��ܜ�\�[��
+export function createProgram(): Command {
+  const program = new Command();
 
-HO��ۜ�\��H]�Z]ܙX]T�\��X�J��ܘ[K���
-K��[JK���\]U\��\��U\��Y
-�]�Y
-JN���\�˜��]�ܚ]J\��	�\�˚YHX\��Y\���\]W�
-NJNJN���ܘ[B����[X[�
-	�[]I�B��\�ܚ\[ۊ	�[]HH\��\�X[�[�I�B��\��[Y[�
-	�Y��	�\��Y	�B��X�[ۊ\�[��
-�]�Y���[��HO�]�Z][�Q\��ܜ�\�[��
+  program
+    .name('task-cli')
+    .description('Manage tasks with JSON file persistence.')
+    .version('1.0.0')
+    .option('-f, --file <path>', 'path to the JSON task file', '.tasks.json');
 
-HO��ۜ�\��H]�Z]ܙX]T�\��X�J��ܘ[K���
-K��[JK�[]U\��\��U\��Y
-�]�Y
-JN���\�˜��]�ܚ]J\��	�\�˚YH[]Y�
-NJNJN��]\����ܘ[NB��\�[���[��[ۈ[�Q\��ܜ�X�[ێ�
+  program
+    .command('add')
+    .description('Add a new task')
+    .argument('<task_description...>', 'task description')
+    .action(async (descriptionBits: string[]): Promise<void> => {
+      try {
+        const task = await createService(program.opts<+ file?: string }>().file ?? '.tasks.json').addTask(descriptionBits.join(' '));
+        console.log(`Task added (ID: ${task.id})`);
+      } catch (error: unknown) {
+        handleCliError(error);
+      }
+    });
 
-HO���Z\�O��Y�N���Z\�O��Y��H]�Z]X�[ۊ
-NH�]�
-\��܎�[�ۛ�ۊH���\�˜�\���ܚ]J\��܎�	��]\��ܓY\��Y�J\��܊_W�
-N���\�˙^]��HH\��܈[��[��[و\���Q\��܈�H��B�B��Y�
-[\ܝ�Y]K�\�OOH�[N�������\�˘\�ݖ�W_X
-H]�Z]ܙX]T��ܘ[J
-K�\��P\�[�����\�˘\�݊NB
+  program
+    .command('list')
+    .description('List tasks')
+    .option('--filter <status>', 'filter by status: all, pending, completed', 'all')
+    .action(async (options: { filter?: string }): Promise<void> => {
+      try {
+        const filter = options.filter ?? 'all';
+        if (!isTaskFilter(filter)) {
+          throw new ValidationError ('Filter must be one of: all, pending, completed.');
+        }
+        const tasks = await createService(program.opts<{ file?: string }>().file ?? '.tasks.json').listTasks(filter);
+        console.log(formatTaskTable(tasks));
+      } catch (error: unknown) {
+        handleCliError(error);
+      }
+    });
+
+  program
+    .command('complete')
+    .description('Mark a task as completed')
+    .argument('<task_id>', 'task ID')
+    .action(async (taskId: string): Promise<void> => {
+      try {
+        const task = await createService(program.opts<{ file?: string }>().file ?? '.tasks.json').completeTask(parseTaskId(taskId));
+        console.log(`Task ${task.id} marked as complete`);
+      } catch (error: unknown) {
+        handleCliError(error);
+      }
+    });
+
+  program
+    .command('delete')
+    .description('Delete a task permanently')
+    .argument('<task_id>', 'task ID')
+    .action(async (taskId: string): Promise<void> => {
+      try {
+        const task = await createService(program.opts<{ file?: string }>().file ?? '.tasks.json').deleteTask(parseTaskId(taskId));
+        console.log(`Task ${task.id} deleted`);
+      } catch (error: unknown) {
+        handleCliError(error);
+      }
+    });
+
+  return program;
+}
+
+async function main(): Promise<void> {
+  await createProgram().parseAsync(process.argv);
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((error: unknown) => {
+    handleCliError(error);
+  });
+}
+
+function fileURLToPath(url: string): string {
+  return path.resolve(new URL(url).pathname);
+}

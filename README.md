@@ -4,7 +4,6 @@ A node.js CLI for managing tasks with durable JSON file storage. It supports add
 
 ## Installation
 
-
 ```bash
 npm install
 npm run build
@@ -12,7 +11,7 @@ npm run build
 
 ## Usage
 
-The default storage file is `.tasks.json`. Use `-f-file <path>` to specify a different JSON file.
+The default storage file is `.tasks.json`. Use `--file <path>` or `-f <path>` to specify a different JSON file.
 
 ```bash
 # Add a task
@@ -25,7 +24,7 @@ node dist/index.js list
 node dist/index.js list --filter pending
 
 # List completed tasks
-node dist/index.js list -f-filter completed
+node dist/index.js list --filter completed
 
 # Complete a task
 node dist/index.js complete 1
@@ -34,7 +33,8 @@ node dist/index.js complete 1
 node dist/index.js delete 1
 
 # Use a custom storage file
-node dist/index.js -f-file ./data/work.json add "Prepare report"
+node dist/index.js --file ./data/work.json add "Prepare report"
+node dist/index.js -f ./data/work.json list
 ```
 
 ## Commands
@@ -43,9 +43,9 @@ node dist/index.js -f-file ./data/work.json add "Prepare report"
 
 Creates a pending task with a unique ID and creation timestamp.
 
-### `list [-f-filter <status>]`
+### `list [--filter <status>]`
 
-Lists tasks with ID, title, status, and timestamps. The optional filter accepts `pending`, `completed`, or `all`.
+Lists tasks with ID, title, status, creation timestamp, and completion timestamp when present. The optional filter accepts `all`, `pending`, or `completed`.
 
 ### `complete <task_id>`
 
@@ -55,7 +55,7 @@ Marks a pending task as completed and records a completion timestamp.
 
 Deletes a task permanently.
 
-## Data Sctorage
+## Data Storage
 
 Tasks are stored in JSON using this structure:
 
@@ -66,17 +66,25 @@ Tasks are stored in JSON using this structure:
       "id": 1,
       "title": "Buy groceries",
       "status": "pending",
-      "createdAt": "2024-01-01T10:00:00.000Z",
-      "completedAt": null
+      "createdAt": "2024-01-01T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "title": "Finish report",
+      "status": "completed",
+      "createdAt": "2024-01-01T11:00:00.000Z",
+      "completedAt": "2024-01-01T12:00:00.000Z"
     }
   ]
 }
 ```
+
+Pending tasks omit `completedAt`. Completed tasks store `completedAt` as an ISO-8601 string. The parser also tolerates legacy files with `completedAt: null`.
 
 The CLI creates the storage file if it does not exist. Writes are persisted immediately after add, complete, and delete operations.
 
 ## Testing
 
 ```bash
-npm test
+nmp test
 ```
