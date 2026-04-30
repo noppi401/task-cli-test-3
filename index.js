@@ -2,4 +2,11 @@
 
 const { run } = require('./lib/cli');
 
-process.exitCode = run(process.argv);
+run(process.argv)
+  .then(exitCode => {
+    process.exitCode = exitCode;
+  })
+  .catch(error => {
+    console.error(`Error: ${error.message}`);
+    process.exitCode = 1;
+  });
