@@ -6,14 +6,13 @@ A node.js CLI for managing tasks with durable JSON file storage. It supports add
 
 
 ```bash
-nm install
+nmp install
 npm run build
 ```
 
 ## Usage
 
 The default storage file is `.tasks.json`. Use `--file <path>` to specify a different JSON file.
-
 
 ```bash
 # Add a task
@@ -42,30 +41,23 @@ node dist/index.js --file ./data/work.json add "Prepare report"
 
 ### `add <description>`
 
-Creates a pending task with a unique ID and a creation timestamp.
+Creates a pending task with a unique ID and creation timestamp.
 
-Example output:
+### `list [--filter <status>]`
 
-```text
-Task added (ID: 1)
-```
+Lists tasks with ID, title, status, and timestamps. The optional filter accepts `pending`, `completed`, or `all`.
 
-### `list [--filter <all|pending|completed>]`
+### `complete <task_id>`
 
-Lists tasks in a table. The default filter is `all`.
+Marks a pending task as completed and records a completion timestamp.
 
-
-### `complete <id>`
-
-Marks a task as completed and records `completedAt`.
-
-### `delete <id>`
+### `delete <task_id>`
 
 Deletes a task permanently.
 
-## Data Structure
+## Data Storage
 
-The JSON file stores a single object with a `tasks` array:
+Tasks are stored in JSON using this structure:
 
 ```json
 {
@@ -74,26 +66,17 @@ The JSON file stores a single object with a `tasks` array:
       "id": 1,
       "title": "Buy groceries",
       "status": "pending",
-      "createdAt": "2026-04-30T09:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "title": "Submit report",
-      "status": "completed",
-      "createdAt": "2026-04-30T10:00:00.000Z",
-      "completedAt": "2026-04-30T11:00:00.000Z"
+      "createdAt": "2024-01-01T10:00:00.000Z",
+      "completedAt": null
     }
   ]
 }
 ```
 
-## JSON Integrity
-
-The storage layer validates the file shape before use. Missing files are created automatically. Writes are atomic: the new JSON is written to a temporary file before it replaces the target.
+The CLI creates the storage file if it does not exist. Writes are persisted immediately after add, complete, and delete operations.
 
 ## Testing
 
-
 ```bash
-nm test
+nmp test
 ```
