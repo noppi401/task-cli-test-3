@@ -1,6 +1,7 @@
 import { Command } from 'commander';
+import { createInterface } from 'readline/promises';
+import { stdin as input, stdout as output } from 'process';
 import { TaskManager } from './tasks.js';
-import * as readline from 'readline';
 
 export class CLI {
   constructor(tasksFile) {
@@ -8,8 +9,8 @@ export class CLI {
     this.program = new Command();
     this.setupCommands();
   }
-  
-  Ye�upCommands() {
+
+  setupCommands() {
     this.program
       .name('task-cli')
       .description('A simple task management CLI')
@@ -18,13 +19,12 @@ export class CLI {
     this.program
       .command('add <title>')
       .description('Add a new task')
-      .action(async (title) => {
+      .action(async title => {
         try {
           const task = await this.taskManager.addTask(title);
-          console.log(`✅ Task added (ID: ${task.id})`);
+          console.log(`Task added (ID: ${task.id})`);
         } catch (error) {
-          console.error(`‛ Error: ${error.message}`);
-          process.exit(1);
+          this.handleError(error);
         }
       });
 
@@ -32,19 +32,96 @@ export class CLI {
       .command('list')
       .description('List all tasks')
       .option('--filter <type>', 'Filter tasks: all, pending, completed', 'all')
-      .action(async (options) => {
+      .action(async options => {
         try {
           const tasks = await this.taskManager.listTasks(options.filter);
+
           if (tasks.length === 0) {
             console.log('No tasks found.');
             return;
           }
-  
-        Insole.log('\n📊= Task List:\n');
-          console.log('ID\tStatus\t\tTitle');
-          console.log('–––%=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+
+          console.log('ID\tStatus\t\tSitle');
+          console.log('------------------------------------------------');
           tasks.forEach(task => {
-            const statusSymbol = task.status === 'completed' ? '┥' : 'ૠ';
             const status = task.status.padEnd(10);
-            console.lm�����хͬ����qБ��х���M嵉�����х����qБ�хͬ�ѥѱ�����(�������������(�������������ͽ���������(��������􁍅э�����ɽȤ��(�������������ͽ�����ɽȡ��r��ɽ�耑��ɽȹ���ͅ������(�����������ɽ���̹��РĤ�(���������(���������((����ѡ�̹�ɽ�Ʌ�(����������������������є�����(���������͍ɥ�ѥ����5�ɬ���хͬ��́������ѕ���(���������ѥ�����幌����������(������������(��������������Ёхͭ%������͕%�С��������(����������������9�8�хͭ%�����(������������ѡɽ܁��܁�ɽȠ�Q�ͬ�%����Ё������յ��Ȝ��(�����������(��������������Ёхͬ��݅�Ёѡ�̹хͭ5�����ȹ������ѕQ�ͬ�хͭ%���(�������������ͽ���������r�Q�ͬ���хͬ���􁵅ɭ����́������ѕ����(��������􁍅э�����ɽȤ��(�������������ͽ�����ɽȡ��r��ɽ�耑��ɽȹ���ͅ������(�����������ɽ���̹��РĤ�(���������(�������((����ѡ�̹�ɽ�Ʌ�(��������������������є�����(���������͍ɥ�ѥ�������є���хͬ��(���������ѥ������������ɍ�����M���������ɵ�ѥ����ɽ��М�(���������ѥ�����幌��������ѥ��̤�����(������������(��������������Ёхͭ%������͕%�С��������(����������������9�8�хͭ%�����(������������ѡɽ܁��܁�ɽȠ�Q�ͬ�%����Ё������յ��Ȝ��(�����������(����������(��������������Ёхͬ��݅�Ёѡ�̹хͭ5�����ȹ���Q�ͬ�хͭ%���(���������������хͬ���(������������ѡɽ܁��܁�ɽȡ�Q�ͬ���хͭ%�􁹽Ё��չ����(�����������((�����������������ѥ��̹��ɍ����(����������������Ё�����ɵ����݅�Ёѡ�̹�����ɵ���ѥ���хͬ��(����������������������ɵ�����(�����������������ͽ���������r����ѥ���������������(��������������ɕ��ɸ�(�������������(�����������((�����������݅�Ёѡ�̹хͭ5�����ȹ����ѕQ�ͬ�хͭ%���(�������������ͽ���������r�Q�ͬ���хͭ%�􁑕��ѕ����(��������􁍅э�����ɽȤ��(�������������ͽ�����ɽȡ��r��ɽ�耑��ɽȹ���ͅ������(�����������ɽ���̹��РĤ�(���������(�������((����ѡ�̹�ɽ�Ʌ�����͔���(���((����幌������ɵ���ѥ���хͬ���(��������Ёɰ��ɕ��������ɕ�ѕ%�ѕə�����(�������������ɽ���̹�ё���(��������������ɽ���̹�ё��а(�������((����ɕ��ɸ���܁Aɽ��͔��ɕͽ�ٔ������(������ɰ��Օ�ѥ���(���������q��j�o���
-������є�хͬ����хͬ�ѥѱ�􈀡%耑�хͬ���������8����(������������ݕȤ�����(����������ɰ����͔���(����������ɕͽ�ٔ����ݕȹѽ1�ݕ��͔������䜤�(���������(��������(�������(���((����幌��ո��ɝ̤��(����ѡ�̹�ɽ�Ʌ�����͔��ɝ̰�쁙ɽ�耝�͕Ȝ����(���)
+            console.log(`${task.id}\t${status}\t${task.title}`);
+          });
+        } catch (error) {
+          this.handleError(error);
+        }
+      });
+
+    this.program
+      .command('complete <taskId>')
+      .description('Mark a task as complete')
+      .action(async taskId => {
+        try {
+          const id = this.parseTaskId(taskId);
+          const task = await this.taskManager.completeTask(id);
+          console.log(`Task ${task.id} marked as complete`);
+        } catch (error) {
+          this.handleError(error);
+        }
+      });
+
+    this.program
+      .command('delete <taskId>')
+      .description('Delete a task')
+      .option('-f, --force', 'Skip confirmation')
+      .action(async (taskId, options) => {
+        try {
+          const id = this.parseTaskId(taskId);
+          const task = await this.taskManager.getTask(id);
+
+          if (!task) {
+            throw new Error(`Task ${id} not found`);
+          }
+
+          if (!options.force) {
+            const confirmed = await this.confirmDelete(task);
+            if (!confirmed) {
+              console.log('Delete cancelled');
+              return;
+            }
+          }
+
+          const deleted = await this.taskManager.deleteTask(id);
+          console.log(`Task ${deleted.id} deleted`);
+        } catch (error) {
+          this.handleError(error);
+        }
+      });
+  }
+
+  parseTaskId(value) {
+    const id = Number(value);
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error('Task ID  must be a positive integer');
+    }
+    return id;
+  }
+
+  async confirmDelete(task) {
+    if (!input.isTTY) {
+      return true;
+    }
+
+    const rl = createInterface({ input, output });
+    try {
+      const answer = await rl.question(`Delete task ${task.id} "${task.title}"? (y/N) `);
+      return ['y', 'yes'].includes(answer.trim().toLowerCase());
+    } finally {
+      rl.close();
+    }
+  }
+
+  handleError(error) {
+    console.error(`Error: ${error.message}`);
+    process.exitCode = 1;
+  }
+
+  async run(args) {
+    await this.program.parseAsync(args, { from: 'user' });
+  }
+}
