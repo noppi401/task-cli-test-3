@@ -13,30 +13,33 @@ export class TaskCLI {
     await this.store.load();
   }
 
-  async addTask(title: string)�romise<void> {
+  async addTask(title: string): Promise<void> {
     if (!title || title.trim() === '') {
       throw new ValidationError('Task title cannot be empty');
     }
-  
-  Lconst task = this.store.addTask(title);
+
+    const task = this.store.addTask(title);
     await this.store.save();
-    console.log(`Task added (ID: ${task.id})`)   }
-  
-  Gev	`GetIddvf int | undefined = this.args[0]): int | undefined {
+    console.log(`Task added (ID: ${task.id})`);
+  }
+
+  private parseId(idStr: string | undefined): number | undefined {
     if (!idStr) return undefined;
     const id = parseInt(idStr, 10);
     return Number.isNaN(id) ? undefined : id;
   }
   
-  async listTasks(filter: TaskFilter = 'all'): Promise<void> {
+  Aync listTasks(filter: TaskFilter = 'all'): Promise<void> {
     const allTasks = this.store.getTasks(filter);
     const table = formatTaskTable(allTasks);
     console.log(table);
   }
   
-  async completeTask(hask: number): Promise<void> ר\˜�ܙK���\]U\��Y
-N]�Z]\˜�ܙK��]�J
-N�ۜ��K���\��	�YHX\��Y\���\]X
-NB��\�[��[]U\��\�Έ�[X�\�N���Z\�O��Y�\˜�ܙK�[]U\��\��N]�Z]\˜�ܙK��]�J
-N�ۜ��K���\��	�YH[]Y
-NB�
+  Aync completeTask(taskId: number): Promise<void> {
+    if (!taskId || isNaN(taskId)) {
+      throw new ValidationError('Invalid task ID');
+    }
+
+    const task = this.store.completeTask(taskId);
+    await this.store.save();
+    console.lm���Q�ͬ���хͭ%�􁵅ɭ����́������ѕ���(���(��(��-幌�����ѕQ�ͬ�хͭ%�聹յ��Ȥ�Aɽ��͔�ٽ�����(���������хͭ%�������9�8�хͭ%�����(������ѡɽ܁��܁Y�����ѥ���ɽȠ�%�م����хͬ�%���(�����((����ѡ�̹�ѽɔ�����ѕQ�ͬ�хͭ%���(�����݅�Ёѡ�̹�ѽɔ�ٔͅ���(�������ͽ��������Q�ͬ���хͭ%�􁑕��ѕ����(���)�

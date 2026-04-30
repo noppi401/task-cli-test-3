@@ -18,12 +18,17 @@
     "task",
     "cli",
     "management",
-    "jason"
+    "json"
   ],
   "author": "",
   "license": "MIT",
-  "devDependencies": { 
-    "@slint-eslint/eslint-config": "^26.0.0",
+  "devDependencies": {
+    "@types/eslint": "^8.56.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
-    "eslint": �^֌�������\������K�K�����Z�\������K�K����\\�ܚ\����K�ˌ��B�B
+    "eslint": "^8.50.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.0"
+  }
+}
