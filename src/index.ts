@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+import { TaskStore } from './tasks.js'
+import { CLI } from './cli.js'
+
+async function main(): Promise<void> {
+  try {
+    const store = new TaskStore('./tasks.json')
+    const cli = new CLI(store)
+    const result = await cli.run(process.argv.slice(2))
+    console.log(result)
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Error: ${error.message}`)
+    } else {
+      console.error('An unexpected error occurred')
+    }
+    process.exit(1)
+  }
+}
+
+main();
