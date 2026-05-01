@@ -1,6 +1,1 @@
-module.exports = {
-  testEnvironment: 'node',
-  transform: {
-    '^.+\\.(ts?|xu?$)': 'babel-jest',
-  },
-};
+module.exports={testEnvironment:'node',testMatch:['**/__tests__/**/*.test.js'],transform:{}};

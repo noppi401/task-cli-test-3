@@ -1,1 +1,3 @@
-�jh�Ћ "������bo�%�;"��+�6��J뢷�o剿�j�,�Ƭ�w�w-���j)ܢ{-rX
+#!/usr/bin/env node
+import{runCli}from'./lib/cli.js';
+process.exitCode=await runCli(process.argv.slice(2));
