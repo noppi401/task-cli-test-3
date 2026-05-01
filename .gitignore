@@ -1,5 +1,9 @@
 node_modules/
-.npm-debug.log
+npm-debug.log
 tasks.json
+data/
 .env
 .env.local
+.DS_Store
+*.log
+
