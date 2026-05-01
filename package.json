@@ -1,20 +1,20 @@
 {
   "name": "task-cli",
   "version": "1.0.0",
-  "description": "Node.js task management CLI with JSON persistence",
+  "description": "A command-line task management application with JSON persistence",
   "type": "module",
   "main": "index.js",
   "bin": {
     "task-cli": "./index.js"
   },
   "scripts": {
-    "start": "node index.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+    "test": "node --test __tests__/*.test.js",
+    "start": "node index.js"
   },
+  "keywords": ["task", "cli", "management"],
+  "author": "",
+  "license": "MIT",
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
+    "node": ">=16.0.0"
   }
 }
