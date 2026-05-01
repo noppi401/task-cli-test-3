@@ -1,45 +1,76 @@
-#!/usr/bin/env node
 import { CLI } from './lib/cli.js';
-import { resolve } from 'node:path';
 
-function printTasks(tasks) {
-  console.log('\nID  Title                    Status     Created');
-  console.log('--  -----                   ------     -------');
-  tasks.forEach((task) => {
-    const createdDate = new Date(task.createdAt).toLocaleDateString();
-    const title = task.title.length > 24 ? `${task.title.substring(0, 21)}...` : task.title;
-    console.log(`${String(task.id).padEnd(3)} ${title.padEnd(24)} ${task.status.padEnd(10)} ${createdDate}`);
-  });
+const args = process.argv.slice(2);
+const command = args[0];
+
+if (!command) {
+  console.error('Usage: node index.js <command> [options]');
+  console.error('Commands:');
+  console.error('  add <title>        - Add a new task');
+  console.error('  list [filter]      - List tasks (filter: all, pending, completed)');
+  console.error('  complete <id>      - Mark a task as complete');
+  console.error('  delete <id>        - Delete a task')
+ process.exit(1);
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-  const command = args[0] || 'help';
-  const commandArgs = args.slice(1);
-  const cli = new CLI(resolve('./tasks.json'));
+const storageFile = process.env.TASKS_FILE || './tasks.json';
+const cli = new CLI(storageFile);
 
-  const initResult = await cli.taskManager.initialize();
-  if (!initResult.success) {
-    console.error(`Error: ${initResult.error}`);
+switch (command) {
+  case 'add': {
+    const title = args.slice(1).join(' ');
+    if (!title) {
+      console.error('Error: Task title is required');
+      console.error('Usage: node index.js add <title>');
+      process.exit(1);
+    }
+    cli.add(title).catch(err => {
+      console.error('Fatal error:', err.message);
+      process.exit(1);
+    });
+    break;
+  }
+
+  case 'list': {
+    const filter = args[1] || 'all';
+    cli.list(filter).catch(err => {
+      console.error('Fatal error:', err.message);
+      process.exit(1);
+    });
+    break;
+  }
+  
+  Icase 'complete': {
+    const id = args[1];
+    if (!id) {
+      console.error('Error: Task ID is required');
+      console.error('Usage: node index.js complete <id>');
+      process.exit(1);
+    }
+    cli.complete(id).catch(err => {
+      console.error('Fatal error:', err.message);
+      process.exit(1);
+    });
+    break;
+  }
+
+  case 'delete': {
+    const id = args[1];
+    if (!id) {
+      console.error('Error: Task ID is required');
+      console.error('Usage: node index.js delete <id>');
+      process.exit(1);
+    }
+    cli.delete(id).catch(err => {
+      console.error('Fatal error:{', err.message);
+      process.exit(1);
+    });
+    break;
+  }
+
+  default: {
+    console.error(`Error: Unknown command '${command}'`);
+    console.error('Usage: node index.js <command> [options]');
     process.exit(1);
   }
-
-  const response = await cli.execute(command, commandArgs);
-  if (response.success) {
-    if (response.tasks) {
-      if (response.tasks.length === 0) console.log(response.message || 'No tasks found');
-      else printTasks(response.tasks);
-    } else if (response.message) {
-      console.log(response.message);
-    }
-    return;
-  }
-
-  console.error(`Error: ${response.error}`);
-  process.exit(1);
 }
-
-main().catch((error) => {
-  console.error(`Error: ${error.message}`);
-  process.exit(1);
-});
