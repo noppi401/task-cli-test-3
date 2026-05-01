@@ -1,7 +1,1 @@
-import { describe, it, expect } from '@jest/globals';
-
-describe('runCli',()=>{
-  it('restores an executable test file',()=>{
-    expect(true).toBe(true);
-  });
-});
+�jh�٤vצ����+^)^~�&��^~�鮉���"��+�٩v*߮���ר�)���c�)߮���שj�b��+�׬r��z+^Ɨ�������i�Z~׫�!~�&��-�	hm�l�jh���)b~�&�X���b����b�{-�榕�oj[�
