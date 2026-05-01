@@ -2,7 +2,6 @@ import { run } from './lib/cli.js';
 
 const args = process.argv.slice(2);
 
-// Display usage if no arguments
 if (args.length === 0) {
   console.log('Task Management CLI Usage:');
   console.log('  node index.js add "Task Description"');
@@ -12,7 +11,7 @@ if (args.length === 0) {
   process.exit(0);
 }
 
-run(args).catch((\)e) => {
+run(args).catch((error) => {
   console.error(error.message);
   process.exit(1);
 });
