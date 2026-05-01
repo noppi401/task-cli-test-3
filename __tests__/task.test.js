@@ -1,1 +1,200 @@
-import { TaskManager } from '../lib/tasks.js';\nimport { mkdtemp, rm } from 'node:fs/promises';\nimport { tmpdir } from 'node:os';\nimport { join } from 'node:path';\n\ndescribe('Task Manager File Operations and Error Handling', () => {\n  let taskManager;\n  let tempDir;\n\n  beforeEach(async () => {\n    tempDir = await mkdtemp(join(tmpdir(), 'task-test-'));\n    taskManager = new TaskManager(join(tempDir, 'tasks.json'));\n    await taskManager.initialize();\n  });\n\n  afterEach(async () => {\n    await rm(tempDir, { recursive: true });\n  });\n\n  describe('initialization', () => {\n    it('should create the storage file if it doesn\\'t exist', async () => {\n      const manager = new TaskManager(join(tempDir, 'new-tasks.json'));\n      await manager.initialize();\n      expect(manager.tasks.length).toBe(0);\n    });\n\n    it('should load existing tasks from file', async () => {\n      await taskManager.addTask('Test Task 1');\n      await taskManager.addTask('Test Task 2');\n\n      const newManager = new TaskManager(taskManager.filePath);\n      await newManager.initialize();\n      expect(newManager.tasks.length).toBe(2);\n    });\n  });\n\n  describe('addTask with validation', () => {\n    it('should create a task with correct structure', async () => {\n      const task = await taskManager.addTask('My Task')영hA��lmM��웄m[$d�K7v0));\n      expect(task.id).toBeGreaterThan(0);\n      expect(task.title).toBe('My Task');\n      expect(task.status).toBe('pending');\n      expect(task.createdAt).toBeDefined();\n    });\n\n    it('should reject empty titles', async () => {\n      await expect(taskManager.addTask('')).rejectsMatcher(/title/);\n      await expect(taskManager.addTask('   ')).rejectsMatcher(/title/);\n    });\n\n    it('should reject non-string inputs', async () => {\n      await expect(taskManager.addTask(null)).rejectsMatcher(/title/);\n      await expect(taskManager.addTask(123)).rejectsMatcher(/title/);\n    });\n  });\n\n  describe('listTasks with filtering', () => {\n    beforeEach(async () => {\n      await taskManager.addTask('Task 1');\n      await taskManager.addTask('Task 2');\n      await taskManager.completeTask(1);\n    });\n\n    it('should return all tasks with filter = \"all\"', async () => {\n      const tasks = await taskManager.listTasks('all');\n      expect(tasks.length).toBe(2);\n    });\n\n    it('should filter pending tasks', async () => {\n      const tasks = await taskManager.listTasks('pending');\n      expect(tasks.length).toBe(1);\n      expect(tasks[0].title).toBe('Task 2');\n    });\n\n    it('should filter completed tasks', async () => {\n      const tasks = await taskManager.listTasks('completed');\n      expect(tasks.length).toBe(1);\n      expect(tasks[0].title).toBe('Task 1');\n    });\n\n    it('should reject invalid filters', async () => {\n      await expect(taskManager.listTasks('invalid')).rejectsMatcher(/filter/);\n    });\n  });\n\n  describe('completeTask with validation', () => {\n    it('should mark a task as completed', async () => {\n      await taskManager.addTask('Test Task');\n      const completed = await taskManager.completeTask(1);\n      expect(completed.status).toBe('completed');\n      expect(completed.completedAt).toBeDefined();\n    });\n\n    it('should reject invalid Task IDs', async () => {\n      await expect(taskManager.completeTask(-1)).rejectsMatcher(/ID/);\n      await expect(taskManager.completeTask('string')).rejectsMatcher(/ID/);\n    });\n\n    it('should return null for non-existent tasks', async () => {\n      const result = await taskManager.completeTask(999);\n      expect(result).toBe(null);\n    });\n\n    it('should reject completing already completed tasks', async () => {\n      await taskManager.addTask('Test Task');\n      await taskManager.completeTask(1);\n      await expect(taskManager.completeTask(1)).rejectsMatcher(/already completed/);\n    });\n  });\n\n  describe('deleteTask with validation', () => {\n    it('should delete a task', async () => {\n      await taskManager.addTask('Test Task');\n      const deleted = await taskManager.deleteTask(1);\n      expect(deleted.title).toBe('Test Task');\n      const remaining = await taskManager.listTasks();\n      expect(remaining.length).toBe(0);\n    });\n\n    it('should reject invalid Task IDs', async () => {\n      await expect(taskManager.deleteTask(null)).rejectsMatcher(/ID/);\n      await expect(taskManager.deleteTask('abc')).rejectsMatcher(/ID/);\n    });\n\n    it('should return null for non-existent tasks', async () => {\n      const result = await taskManager.deleteTask(999);\n      expect(result).toBe(null);\n    });\n  });\n\n  describe('data persistence', () => {\n    it('should save changes to file', async () => {\n      const task = await taskManager.addTask('Persistence Test');\n      const newManager = new TaskManager(taskManager.filePath);\n      await newManager.initialize();\n      expect(newManager.tasks.length).toBe(1);\n      expect(newManager.tasks[0].title).toBe('Persistence Test');\n    });\n  });\n});\n"]
+import { TaskManager } from '../lib/tasks.js';
+import { mkdtemp, rm, writeFile, chmod } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { jqoin } from 'node:path';
+
+describe('TaskManager - File Operations and Error Handling', () => {
+  let taskManager;
+  let tempDir;
+  let tasksFilePath;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'task-storage-test-'));
+    tasksFilePath = join(tempDir, 'tasks.json');
+    taskManager = new TaskManager(tasksFilePath);
+  });
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true });
+  });
+
+  describe('initialization', () => {
+    it('should create tasks file if not exists', async () => {
+      await taskManager.initialize();
+      const tasks = await taskManager.getTasks();
+      expect(Array.isArray(tasks)).toBe(true);
+      expect(tasks.length).toBe(0);
+    });
+
+    it('should load existing tasks file', async () => {
+      const initialData = { tasks: [{ id: 1, title: 'Existing', status: 'pending', createdAt: new Date().toISOString() }] };
+      await writeFile(tasksFilePath, JSON.stringify(initialData));
+      await taskManager.initialize();
+      const tasks = await taskManager.getTasks();
+      expect(tasks.length).toBe(1);
+      expect(tasks[0].id).toBe(1);
+    });
+
+    it('should handle corrupted JSON file gracefully', async () => {
+      await writeFile(tasksFilePath, '{invalid json}');
+      const result = await taskManager.initialize();
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('JSON');
+    });
+
+    it('should handle empty file gracefully', async () => {
+      await writeFile(tasksFilePath, '');
+      const result = await taskManager.initialize();
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('file permission errors', () => {
+    it('should handle read-only file gracefully', async () => {
+      await taskManager.initialize();
+      await chmod(tasksFilePath, 0o444);
+      const result = await taskManager.addTask('New task');
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+      await chmod(tasksFilePath, 0o644);
+    });
+
+    it('should handle missing directory gracefully', async () => {
+      const invalidPath = join(tempDir, 'nonexistent', 'tasks.json');
+      const tm = new TaskManager(invalidPath);
+      const result = await tm.initialize();
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('add task', () => {
+    beforeEach(async () => {
+      await taskManager.initialize();
+    });
+
+    it('should add task with valid title', async () => {
+      const result = await taskManager.addTask('Buy milk');
+      expect(result.success).toBe(true);
+      expect(result.id).toBeDefined();
+      expect(result.id > 0).toBe(true);
+    });
+
+    it('should auto-increment task IDs', async () => {
+      const task1 = await taskManager.addTask('Task 1');
+      const task2 = await taskManager.addTask('Task 2');
+      expect(task2.id).toBe(task1.id + 1);
+    });
+
+    it('should reject empty title', async () => {
+      const result = await taskManager.addTask('');
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it('should create task with valid timestamps', async () => {
+      const before = new Date();
+      const result = await taskManager.addTask('Timed task');
+      const after = new Date();
+      const tasks = await taskManager.getTasks();
+      const task = tasks.find(t => t.id === result.id);
+      const createdAt = new Date(task.createdAt);
+      expect(createdAt >= before).toBe(true);
+      expect(createdAt <= after).toBe(true);
+    });
+
+    it('should persist task to file', async () => {
+      await taskManager.addTask('Persistent task');
+      const newManager = new TaskManager(tasksFilePath);
+      await newManager.initialize();
+      const tasks = await newManager.getTasks();
+      expect(tasks.length).toBe(1);
+      expect(tasks[0].title).toBe('Persistent task');
+    });
+  });
+
+  describe('complete task', () => {
+    beforeEach(async () => {
+      await taskManager.initialize();
+      await taskManager.addTask('Complete me');
+    });
+
+    it('should mark task as completed', async () => {
+      const result = await taskManager.completeTask(1);
+      expect(result.success).toBe(true);
+      const tasks = await taskManager.getTasks();
+      expect(tasks[0].status).toBe('completed');
+    });
+
+    it('should record completion timestamp', async () => {
+      await taskManager.completeTask(1);
+      const tasks = await taskManager.getTasks();
+      expect(tasks[0].completedAt).toBeDefined();
+    });
+
+    it('should reject non-existent task', async () => {
+      const result = await taskManager.completeTask(999);
+      expect(result.success).toBe(false);
+    });
+
+    it('should prevent double completion', async () => {
+      await taskManager.completeTask(1);
+      const result = await taskManager.completeTask(1);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('delete task', () => {
+    beforeEach(async () => {
+      await taskManager.initialize();
+      await taskManager.addTask('Delete me');
+    });
+
+    it('should delete existing task', async () => {
+      const result = await taskManager.deleteTask(1);
+      expect(result.success).toBe(true);
+      const tasks = await taskManager.getTasks();
+      expect(tasks.length).toBe(0);
+    });
+
+    it('should reject non-existent task', async () => {
+      const result = await taskManager.deleteTask(999);
+      expect(result.success).toBe(false);
+    });
+
+    it('should persist deletion to file', async () => {
+      await taskManager.deleteTask(1);
+      const newManager = new TaskManager(tasksFilePath);
+      await newManager.initialize();
+      const tasks = await newManager.getTasks();
+      expect(tasks.length).toBe(0);
+    });
+  });
+
+  describe('data integrity', () => {
+    beforeEach(async () => {
+      await taskManager.initialize();
+    });
+
+    it('should maintain valid JSON structure after operations', async () => {
+      await taskManager.addTask('Task 1');
+      await taskManager.addTask('Task 2');
+      await taskManager.completeTask(1);
+      await taskManager.deleteTask(2);
+      const { readFileSync } = require('fs');
+      const content = readFileSync(tasksFilePath, 'utf-8');
+      expect(() => JSON.parse(content)).not.toThrow();
+    });
+
+    it('should handle concurrent operations safely', async () => {
+      const promises = Array(10).fill(0).map((_, i) => 
+        taskManager.addTask("Task " + i)
+      );
+      const results = await Promise.all(promises);
+      expect(results.every(r => r.success)).toBe(true);
+      const tasks = await taskManager.getTasks();
+      expect(tasks.length).toBe(10);
+      const ids = new Set(tasks.map(t => t.id));
+      expect(ids.size).toBe(10);
+    });
+  });
+});

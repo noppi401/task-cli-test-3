@@ -1,1 +1,156 @@
-import { CLI } from '../lib/cli.js';\nimport { mkdtemp, rm } from 'node:fs/promises';\nimport { tmpdir } from 'node:os';\nimport { join } from 'node:path';\n\ndescribe('CLI Command Handling and Validation', () => {\n  let cli;\n  let tempDir;\n\n  beforeEach(async () => {\n    tempDir = await mkdtemp(join(tmpdir(), 'task-test-'));\n    cli = new CLI(join(tempDir, 'tasks.json'));\n    await cli.taskManager.initialize();\n  });\n\n  afterEach(async () => {\n    await rm(tempDir, { recursive: true });\n  });\n\n  describe('add command', () => {\n    it('should require a task title', async () => {\n      const result = await cli.handleAdd([]);\n      expect(result.success).toBe(false);\n      expect(result.error).toContain('Task title');\n    });\n\n    it('should create a task with valid title', async () => {\n      const result = await cli.handleAdd(['Test task']);\n      expect(result.success).toBe(true);\n      expect(result.task.title).toBe('Test task');\n      expect(result.task.status).toBe('pending');\n    });\n\n    it('should reject titles exceeding 500 characters', async () => {\n      const longTitle = 'a'.repeat(501);\n      const result = await cli.handleAdd([longTitle]);\n      expect(result.success).toBe(false);\n      expect(result.error).toContain('500');\n    });\n  });\n\n  describe('list command', () => {\n    it('should return an empty array if no tasks exist', async () => {\n      const result = await cli.handleList(['all']);\n      expect(result.success).toBe(true);\n      expect(result.tasks.length).toBe(0);\n    });\n\n    it('should filter tasks by status', async () => {\n      await cli.handleAdd(['Task 1']);\n      await cli.handleAdd(['Task 2']���q��������݅�Ё���������������є�l�ĝt��q�q�����������Ё���������݅�Ё����������1��Сl���������t��q�����������Ё������ѕ���݅�Ё����������1��Сl�������ѕ��t��q�����������Ё�����݅�Ё����������1��Сl�����t��q�q������������С��������х̹ͭ����Ѡ��ѽ	��Ĥ�q������������С������ѕ��х̹ͭ����Ѡ��ѽ	��Ĥ�q������������С����х̹ͭ����Ѡ��ѽ	��Ȥ�q��������q�q������Р�͡�ձ��ɕ���Ё��م�������ѕ�̜����幌��������q�����������Ёɕ�ձЀ�݅�Ё����������1��Сl���م����t��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х����%�م�������ѕȜ��q��������q������q�q�����͍ɥ����������є������������������q������Р�͡�ձ��ɕ�եɔ���хͬ�%�����幌��������q�����������Ёɕ�ձЀ�݅�Ё���������������є�mt��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х����Q�ͬ�%���q��������q�q������Р�͡�ձ��������є���م����хͬ�����幌��������q��������݅�Ё�������������l�Q��Ёхͬ�t��q�����������Ёɕ�ձЀ�݅�Ё���������������є�l�ĝt��q������������Сɕ�ձй�Ս���̤�ѽ	����Ք��q������������Сɕ�ձйхͬ��х��̤�ѽ	���������ѕ����q��������q�q������Р�͡�ձ��ɕ���Ё��م����хͬ�%̜����幌��������q�����������Ёɕ�ձЀ�݅�Ё���������������є�l�����t��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х����%�م����хͬ�%���q��������q�q������Р�͡�ձ��ɕ���Ё�������ѕ�Ёх̜ͭ����幌��������q�����������Ёɕ�ձЀ�݅�Ё���������������є�l���̝t��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х������Ё��չ����q��������q������q�q�����͍ɥ��������є������������������q������Р�͡�ձ��ɕ�եɔ���хͬ�%�����幌��������q�����������Ёɕ�ձЀ�݅�Ё�������������є�mt��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х����Q�ͬ�%���q��������q�q������Р�͡�ձ������є���хͬ�����幌��������q��������݅�Ё�������������l�Q��Ёхͬ�t��q�����������Ёɕ�ձЀ�݅�Ё�������������є�l�ĝt��q������������Сɕ�ձй�Ս���̤�ѽ	����Ք��q������������Сɕ�ձй���ͅ����ѽ��х��������ѕ����q��������q�q������Р�͡�ձ��ɕ���Ё��م����хͬ�%̜����幌��������q�����������Ёɕ�ձЀ�݅�Ё�������������є�l��ĝt��q������������Сɕ�ձй�Ս���̤�ѽ	�����͔��q������������Сɕ�ձй��ɽȤ�ѽ��х����%�م����хͬ�%���q��������q������q����q�
+import { CLI } from '../lib/cli.js';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+describe('CLI Command Handling and Validation', () => {
+  let cli;
+  let tempDir;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), 'task-test-'));
+    cli = new CLI(join(tempDir, 'tasks.json'));
+    await cli.taskManager.initialize();
+  });
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true });
+  });
+
+  describe('add command', () => {
+    it('should require a task title', async () => {
+      const result = await cli.handleAdd([]);
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it('should reject empty task title', async () => {
+      const result = await cli.handleAdd(['']);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('empty');
+    });
+
+    it('should add valid task successfully', async () => {
+      const result = await cli.handleAdd(['Buy groceries']);
+      expect(result.success).toBe(true);
+      expect(result.id).toBeDefined();
+      expect(result.message).toContain('Task added');
+    });
+
+    it('should enforce maximum title length', async () => {
+      const longTitle = 'x'.repeat(501);
+      const result = await cli.handleAdd([longTitle]);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('too long');
+    });
+  });
+
+  describe('list command', () => {
+    beforeEach(async () => {
+      await cli.handleAdd(['Task 1']);
+      await cli.handleAdd(['Task 2']);
+    });
+
+    it('should list all tasks when no filter provided', async () => {
+      const result = await cli.handleList([]);
+      expect(result.success).toBe(true);
+      expect(result.tasks.length).toBe(2);
+    });
+
+    it('should filter pending tasks', async () => {
+      const result = await cli.handleList(['--filter', 'pending']);
+      expect(result.success).toBe(true);
+      expect(result.tasks.every(t => t.status === 'pending')).toBe(true);
+    });
+
+    it('should filter completed tasks', async () => {
+      await cli.handleComplete(['1']);
+      const result = await cli.handleList(['--filter', 'completed']);
+      expect(result.success).toBe(true);
+      expect(result.tasks.every(t => t.status === 'completed')).toBe(true);
+    });
+
+    it('should reject invalid filter option', async () => {
+      const result = await cli.handleList(['--filter', 'invalid']);
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('complete command', () => {
+    beforeEach(async () => {
+      await cli.handleAdd(['Test task']);
+    });
+
+    it('should require task ID', async () => {
+      const result = await cli.handleComplete([]);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('ID');
+    });
+
+    it('should reject non-numeric ID', async () => {
+      const result = await cli.handleComplete(['abc']);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('ID');
+    });
+
+    it('should reject negative ID', async () => {
+      const result = await cli.handleComplete(['-1']);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject non-existent task ID', async () => {
+      const result = await cli.handleComplete(['999']);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('not found');
+    });
+
+    it('should mark existing task as complete', async () => {
+      const result = await cli.handleComplete(['1']);
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('completed');
+    });
+
+    it('should prevent double completion', async () => {
+      await cli.handleComplete(['1']);
+      const result = await cli.handleComplete(['1']);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('already');
+    });
+  });
+
+  describe('delete command', () => {
+    beforeEach(async () => {
+      await cli.handleAdd(['Task to delete']);
+    });
+
+    it('should require task ID', async () => {
+      const result = await cli.handleDelete([]);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('ID');
+    });
+
+    it('should reject non-numeric ID', async () => {
+      const result = await cli.handleDelete(['abc']);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject non-existent task ID', async () => {
+      const result = await cli.handleDelete(['999']);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('not found');
+    });
+
+    it('should delete existing task', async () => {
+      const result = await cli.handleDelete(['1']);
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('deleted');
+    });
+
+    it('should not list deleted task', async () => {
+      await cli.handleDelete(['1']);
+      const result = await cli.handleList([]);
+      expect(result.tasks.length).toBe(0);
+    });
+  });
+});
