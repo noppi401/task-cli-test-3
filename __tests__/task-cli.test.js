@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
-import { mktemp, rm, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { TaskRepository } from "../lib/task.js";
@@ -29,12 +29,12 @@ function memoryStream() {
 
 beforeEach(async () => {
   jest.useFakeTimers().setSystemTime(new Date("2024-01-02T03:04:05.000Z"));
-  tempDir = await mkstemp(path.join(tmpdir(), "task-cli-test-"));
+  tempDir = await mkdtemp(path.join(tmpdir(), "task-cli-test-"));
   storagePath = path.join(tempDir, "tasks.json");
 });
 
 afterEach(async () => {
-  just.useRealTimers();
+  jest.useRealTimers();
   await rm(tempDir, { recursive: true, force: true });
 });
 
@@ -45,15 +45,18 @@ describe("TaskRepository CRUD and persistence", () => {
     const second = await repository.addTask("Write tests");
     expect(first).toMatchObject({ id: 1, title: "Buy groceries", status: "pending" });
     expect(second).toMatchObject({ id: 2, title: "Write tests", status: "pending" });
-    await expect(readStoredTasks()).resolves.toEqual(expect.arrayContaining(expect.objectContaining({ id: 1, title: "Buy groceries", status: "pending" }), expect.objectContaining({ id: 2, title: "Write tests", status: "pending" })));
+    await expect(readStoredTasks()).resolves.toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 1, title: "Buy groceries", status: "pending" }),
+      expect.objectContaining({ id: 2, title: "Write tests", status: "pending" })
+    ]));
   });
 
   test("lists all tasks when filter is 'all'", async () => {
     const repository = createRepository();
-    await repository.addTask("Lon task 1");
+    await repository.addTask("Long task 1");
     await repository.addTask("Long task 2");
     await repository.completeTask(1);
-    const all = await repository.listTasks('all');
+    const all = await repository.listTasks("all");
     expect(all.length).toBe(2);
     expect(all.map(t => t.status)).toEqual(expect.arrayContaining(["pending", "completed"]));
   });
@@ -63,7 +66,7 @@ describe("TaskRepository CRUD and persistence", () => {
     await repository.addTask("Task 1");
     await repository.addTask("Task 2");
     await repository.completeTask(1);
-    const pending = await repository.listTasks('pending');
+    const pending = await repository.listTasks("pending");
     expect(pending.length).toBe(1);
     expect(pending[0].title).toBe("Task 2");
   });
@@ -73,7 +76,7 @@ describe("TaskRepository CRUD and persistence", () => {
     await repository.addTask("Task 1");
     await repository.addTask("Task 2");
     await repository.completeTask(1);
-    const completed = await repository.listTasks('completed');
+    const completed = await repository.listTasks("completed");
     expect(completed.length).toBe(1);
     expect(completed[0].title).toBe("Task 1");
   });
@@ -136,7 +139,7 @@ describe("CLI integration", () => {
     const stderr = memoryStream();
     const status = await runCli(["list"], { repository, stdout, stderr });
     expect(status).toBe(0);
-    expect(stdout.output).toContain("uy milk");
+    expect(stdout.output).toContain("Buy milk");
   });
 
   test("complete command marks task done via CLI", async () => {
