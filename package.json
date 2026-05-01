@@ -1,19 +1,1 @@
-{
-  "name": "task-cli",
-  "version": "1.0.0",
-  "description": "A command-line task management tool with persistent JSON storage",
-  "main": "index.js",
-  "bin": {
-    "task-cli": "index.js"
-  },
-  "scripts": {
-    "start": "node index.js"
-  },
-  "keywords": [
-    "task",
-    "cli",
-    "management"
-  ],
-  "author": "",
-  "license": "MIT"
-}
+�����$��b��슉��G^���ب�(�f�w�b��Z�I��������%�+a����^��R8�-���zf��)�{�n)�j�>rX��ױ���*m��Z���u�u�c�׬�z{�z�d{,(��-j��)������j�a��bq��x�
