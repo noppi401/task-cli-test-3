@@ -12,17 +12,27 @@ interface TaskData {
   tasks: Task[];
 }
 
+type TaskFilter = 'all' | 'pending' | 'completed';
+
 const TASKS_FILE = resolve('./tasks.json');
 
 function loadTasks(): TaskData {
   if (!existsSync(TASKS_FILE)) {
     return { tasks: [] };
   }
+
   try {
     const data = readFileSync(TASKS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return { tasks: [] };
+    const parsed = JSON.parse(data) as TaskData;
+
+    if (!parsed || !Array.isArray(parsed.tasks)) {
+      throw new Error('invalid tasks file format');
+    }
+
+    return parsed;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to load tasks from ${TASKS_FILE}: ${message}`);
   }
 }
 
@@ -49,7 +59,7 @@ function addTask(title: string): void {
   console.log(`Task added (ID: ${id})`);
 }
 
-function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
+function listTasks(filter: TaskFilter = 'all'): void {
   const data = loadTasks();
   let tasks = data.tasks;
 
@@ -64,11 +74,11 @@ function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
     return;
   }
 
-  console.log('\\nID  Title        Status');
-  console.log('--  -----      ------');
+  console.log('\nID  Title             Status');
+  console.log('--  ----------------  ---------');
   tasks.forEach(task => {
     const title = task.title.substring(0, 16).padEnd(16);
-    console.log(`${task.id}   ${title}  ${task.status}`);
+    console.log(`${String(task.id).padEnd(2)}  ${title}  ${task.status}`);
   });
   console.log();
 }
@@ -97,6 +107,11 @@ function deleteTask(id: number): void {
   console.log(`Task ${id} deleted`);
 }
 
+function parseTaskId(value: string): number | null {
+  const id = Number.parseInt(value, 10);
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -111,33 +126,57 @@ function main(): void {
     return;
   }
 
-  switch (command) {
-    case 'add':
-      if (!args[1]) {
-        console.error('Task title required');
-        return;
+  try {
+    switch (command) {
+      case 'add':
+        if (!args[1]) {
+          console.error('Task title required');
+          return;
+        }
+        addTask(args[1]);
+        break;
+      case 'list': {
+        const filter = (args[1] ?? 'all') as TaskFilter;
+        if (!['all', 'pending', 'completed'].includes(filter)) {
+          console.error('Invalid filter. Use one of: all, pending, completed');
+          return;
+        }
+        listTasks(filter);
+        break;
       }
-      addTask(args[1]);
-      break;
-    case 'list':
-      listTasks(args[1] as 'all' | 'pending' | 'completed');
-      break;
-    case 'complete':
-      if (!args[1]) {
-        console.error('Task ID required');
-        return;
+      case 'complete': {
+        if (!args[1]) {
+          console.error('Task ID required');
+          return;
+        }
+        const id = parseTaskId(args[1]);
+        if (id === null) {
+          console.error('Task ID must be a positive integer');
+          return;
+        }
+        completeTask(id);
+        break;
       }
-      completeTask(parseInt(args[1], 10));
-      break;
-    case 'delete':
-      if (!args[1]) {
-        console.error('Task ID required');
-        return;
+      case 'delete': {
+        if (!args[1]) {
+          console.error('Task ID required');
+          return;
+        }
+        const id = parseTaskId(args[1]);
+        if (id === null) {
+          console.error('Task ID must be a positive integer');
+          return;
+        }
+        deleteTask(id);
+        break;
       }
-      deleteTask(parseInt(args[1], 10));
-      break;
-    default:
-      console.error(`Unknown command: ${command}`);
+      default:
+        console.error(`Unknown command: ${command}`);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(message);
+    process.exitCode = 1;
   }
 }
 
