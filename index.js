@@ -1,29 +1,45 @@
+#!/usr/bin/env node
 import { CLI } from './lib/cli.js';
 import { resolve } from 'node:path';
 
+function printTasks(tasks) {
+  console.log('\nID  Title                    Status     Created');
+  console.log('--  -----                   ------     -------');
+  tasks.forEach((task) => {
+    const createdDate = new Date(task.createdAt).toLocaleDateString();
+    const title = task.title.length > 24 ? `${task.title.substring(0, 21)}...` : task.title;
+    console.log(`${String(task.id).padEnd(3)} ${title.padEnd(24)} ${task.status.padEnd(10)} ${createdDate}`);
+  });
+}
+
 async function main() {
   const args = process.argv.slice(2);
-  if (args.length === 0) {
-    console.log('Usage: node index.js <command> [args...]');
-    console.log('Run: node index.js help');
-    process.exit(1);
-  }
-  const command = args[0];
+  const command = args[0] || 'help';
   const commandArgs = args.slice(1);
   const cli = new CLI(resolve('./tasks.json'));
-  try {
-    await cli.taskManager.initialize();
-    const response = await cli.execute(command, commandArgs);
-    if (response.success) {
-      if (response.message) {
-        console.log(`✅ ${response.message}`);
-      } else if (response.tasks) {
-        if (response.tasks.length === 0) {
-          console.log('No tasks found');
-        } else {
-          console.log('\nID  Title                    Status   Created');
-          console.log('--  -----                     ------   -------');
-          response.tasks.forEach((task) => {
-            const createdDate = new Date(task.createdAt).toLocaleDateString();
-            const title = task.title.length > 30 ? task.title.substring(0, 27) + '...' : task.title;
-            console.lm�����хͬ����ѽM�ɥ�����������̥��ѥѱ�������������хͬ��х��̹���������ɕ�ѕ��ѕ����(�������������(���������(��-􁕱͔��(�������������ͽ�����ɽȡ��D��ɽ�耑�ɕ����͔���ɽ�����(�����������ɽ���̹��РĤ�(�������(��􁍅э�����ɽȤ��(�������ͽ�����ɽȡ��rD��х����ɽ�耑��ɽȹ���ͅ������(�����ɽ���̹��РĤ�(���)�()�������(
+
+  const initResult = await cli.taskManager.initialize();
+  if (!initResult.success) {
+    console.error(`Error: ${initResult.error}`);
+    process.exit(1);
+  }
+
+  const response = await cli.execute(command, commandArgs);
+  if (response.success) {
+    if (response.tasks) {
+      if (response.tasks.length === 0) console.log(response.message || 'No tasks found');
+      else printTasks(response.tasks);
+    } else if (response.message) {
+      console.log(response.message);
+    }
+    return;
+  }
+
+  console.error(`Error: ${response.error}`);
+  process.exit(1);
+}
+
+main().catch((error) => {
+  console.error(`Error: ${error.message}`);
+  process.exit(1);
+});
