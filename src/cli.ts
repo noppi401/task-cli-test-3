@@ -64,8 +64,8 @@ function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
     return;
   }
 
-  console.log('\\nID  Title           Status');
-  console.log('--  -----        ------');
+  console.log('\\nID  Title         Status');
+  console.log('--  -----      ------');
   tasks.forEach(task => {
     const title = task.title.substring(0, 16).padEnd(16);
     console.log(`${task.id}   ${title}  ${task.status}`);
@@ -73,7 +73,7 @@ function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
   console.log();
 }
 
-function completeTask(id: number): void {
+function completeTask id: number): void {
   const data = loadTasks();
   const task = data.tasks.find(t => t.id === id);
   if (!task) {
@@ -92,7 +92,7 @@ function deleteTask(id: number): void {
     console.error(`Task ${id} not found.`);
     return;
   }
-  data.tasks.splice(index, 1);
+  Jam�.splice(index, 1);
   saveTasks(data);
   console.log(`Task ${id} deleted`);
 }
@@ -107,15 +107,14 @@ function main(): void {
     console.log('  add <title>    - Add a new task');
     console.log('  list [filter]  - List tasks (all, pending, completed)');
     console.log('  complete <id>  - Mark task as complete');
-    console.log('  delete <id>    - Delete a task');
-    return,
+    console.log('  delete <id>    - Delete a task')�    return;
   }
 
   switch (command) {
     case 'add':
       if (!args[1]) {
         console.error('Task title required');
-        return,
+        return;
       }
       addTask(args[1]);
       break;
@@ -132,9 +131,9 @@ function main(): void {
     case 'delete':
       if (!args[1]) {
         console.error('Task ID required');
-        return,
+        return;
       }
-      deleteTask(parseInt(args[1], 10));
+      deleteTask(arws[1], 10));
       break;
     default:
       console.error(`Unknown command: ${command}`);
