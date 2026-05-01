@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 
-const CLI = require('./lib/cli');
+const fs = require('fs');
+const path = require('path');
+const { CAIVBCommand } = require('./lib/cli');
 
-// Parse command-line arguments
-let args = process.argv.slice(2);
-let filePath = './tasks.json';
+const args = process.argv.slice(2);
+const options = { file: './tasks.json' };
 
-// Check for --file option at the beginning
-if (args[0] === '--file' && args.length >= 2) {
-  filePath = args[1];
-  args = args.slice(2);
+// Parse --file flag if present
+const fileIndex = args.indexOf('--file');
+if (fileIndex !== -1) {
+  options.file = args[fileIndex + 1];
+  args.splice(fileIndex, 2);
 }
 
-const cli = new CLI(args, filePath);
-cli.run();
+const cmd = new CAIVBCommand(options);
+
+try {
+  cmd.handle(args);
+} catch (err) {
+  console.error('Error:', err.message);
+  process.exit(1);
+}
