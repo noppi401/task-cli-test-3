@@ -1,0 +1,2 @@
+import { runCli } from "./lib/cli.js";
+process.exitCode = await runCli(process.argv.slice(2));
