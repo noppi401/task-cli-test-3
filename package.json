@@ -1,1 +1,1 @@
-�����$��b��슉��G^���ب�hu��r��jw~�)޵�$��ځ��j)�ױ���֬��%�)�{����-z�g�׭z�rX�z�c�G�ݲ֬��b��ځ�ں�h�X�z{! �z��u�܉�
+{"name":"task-cli","version":"1.0.0","description":"A task management CLI with JSON persistence.","main":"index.js","bin":{"task-cli":"./index.js"},"scripts":{"test":"node --test"},"keywords":["cli","tasks","todo"],"license":"MIT","engines":{"node":">=18"}}
