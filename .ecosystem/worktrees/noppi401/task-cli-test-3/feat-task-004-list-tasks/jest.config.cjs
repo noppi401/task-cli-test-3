@@ -2,11 +2,6 @@ module.exports = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
-  testMatch: ['**/__tests__/**.test.ts'],
+  testMatch: ['**/*.test.ts', '**/__tests__/**/*.test.ts'],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1'
-  },
-  transform: {
-    '^.+?\\.ts$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.json' }]
-  }
-};
+    '^(\\.{,pİ������qp��̐�耜�Ĝ(����(���Ʌ�͙�ɴ��(�����x��qp��̐��l��̵���М����͕M4���Ք���͍�����耝�͍�������ͽ����t(���)��

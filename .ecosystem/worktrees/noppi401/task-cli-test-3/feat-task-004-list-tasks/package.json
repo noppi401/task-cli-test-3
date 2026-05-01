@@ -4,10 +4,13 @@
   "description": "Task management CLI with JSON persistence",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "task-cli": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/index.ts",
-    "test": "jest",
+    "test": "jest --runInBand",
     "start": "node dist/index.js"
   },
   "keywords": [
@@ -19,10 +22,15 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-jest": "^29.0.0",
-    "@jest/globals": "^29.0.0",
-    "jest": "^29.0.0"
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.3",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
