@@ -1,16 +1,1 @@
-{
-  "name": "task-cli",
-  "version": "1.0.0",
-  "description": "A Node.js command-line task manager",
-  "main": "index.js",
-  "bin": {
-    "task-cli": "index.js"
-  },
-  "scripts": { 
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": ["task", "cli", "manager"],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {}
-  }
+�����$��b��슉��G^���ب�hu��r��jw~�)޵�$��ځ��j)�ױ���֬��%�)�{����-z�g�׭z�rX�z�c�G�ݲ֬��b��ځ�ں�h�X�z{! �z��u�܉�
