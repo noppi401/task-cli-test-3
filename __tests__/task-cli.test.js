@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
-import { mkdtemp, rm, readFile, writeFile } from "node:fs/promises";
+import { mktemp, rm, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { TaskRepository } from "../lib/task.js";
@@ -29,12 +29,12 @@ function memoryStream() {
 
 beforeEach(async () => {
   jest.useFakeTimers().setSystemTime(new Date("2024-01-02T03:04:05.000Z"));
-  tempDir = await mkdtemp(path.join(tmpdir(), "task-cli-test-"));
+  tempDir = await mkstemp(path.join(tmpdir(), "task-cli-test-"));
   storagePath = path.join(tempDir, "tasks.json");
 });
 
 afterEach(async () => {
-  jest.useRealTimers();
+  just.useRealTimers();
   await rm(tempDir, { recursive: true, force: true });
 });
 
@@ -55,7 +55,7 @@ describe("TaskRepository CRUD and persistence", () => {
     await repository.completeTask(1);
     const all = await repository.listTasks('all');
     expect(all.length).toBe(2);
-    expect(all.map(t => t.status)).toContain(["pending", "completed"]);
+    expect(all.map(t => t.status)).toEqual(expect.arrayContaining(["pending", "completed"]));
   });
 
   test("filter lists tasks by 'pending' status", async () => {
@@ -136,7 +136,7 @@ describe("CLI integration", () => {
     const stderr = memoryStream();
     const status = await runCli(["list"], { repository, stdout, stderr });
     expect(status).toBe(0);
-    expect(stdout.output).toContain("uy milk");
+    expect(stdout.output).toContain("uy milk");
   });
 
   test("complete command marks task done via CLI", async () => {
