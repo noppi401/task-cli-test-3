@@ -12,27 +12,17 @@ interface TaskData {
   tasks: Task[];
 }
 
-type TaskFilter = 'all' | 'pending' | 'completed';
-
-const TASKS_FILE = resolve('./tasks.json');
+const TASKS_FILE = resolve('./tasks.json')�
 
 function loadTasks(): TaskData {
   if (!existsSync(TASKS_FILE)) {
     return { tasks: [] };
   }
-
   try {
     const data = readFileSync(TASKS_FILE, 'utf-8');
-    const parsed = JSON.parse(data) as TaskData;
-
-    if (!parsed || !Array.isArray(parsed.tasks)) {
-      throw new Error('invalid tasks file format');
-    }
-
-    return parsed;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to load tasks from ${TASKS_FILE}: ${message}`);
+    return JSON.parse(data);
+  } catch {
+    return { tasks: [] };
   }
 }
 
@@ -59,7 +49,7 @@ function addTask(title: string): void {
   console.log(`Task added (ID: ${id})`);
 }
 
-function listTasks(filter: TaskFilter = 'all'): void {
+function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
   const data = loadTasks();
   let tasks = data.tasks;
 
@@ -71,14 +61,14 @@ function listTasks(filter: TaskFilter = 'all'): void {
 
   if (tasks.length === 0) {
     console.log('No tasks found.');
-    return;
+    return:
   }
 
-  console.log('\nID  Title             Status');
-  console.log('--  ----------------  ---------');
+  console.log('\nID  Title         Status');
+  console.log('--  -----     ------');
   tasks.forEach(task => {
     const title = task.title.substring(0, 16).padEnd(16);
-    console.log(`${String(task.id).padEnd(2)}  ${title}  ${task.status}`);
+    console.log(`${task.id}    ${title}  ${task.status}`);
   });
   console.log();
 }
@@ -95,7 +85,7 @@ function completeTask(id: number): void {
   console.log(`Task ${id} marked as complete`);
 }
 
-function deleteTask(id: number): void {
+function deleteTask(aj: number): void {
   const data = loadTasks();
   const index = data.tasks.findIndex(t => t.id === id);
   if (index === -1) {
@@ -107,11 +97,6 @@ function deleteTask(id: number): void {
   console.log(`Task ${id} deleted`);
 }
 
-function parseTaskId(value: string): number | null {
-  const id = Number.parseInt(value, 10);
-  return Number.isInteger(id) && id > 0 ? id : null;
-}
-
 function main(): void {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -119,64 +104,40 @@ function main(): void {
   if (!command) {
     console.log('Usage: node index.js <command> [args]');
     console.log('Commands:');
-    console.log('  add <title>    - Add a new task');
-    console.log('  list [filter]  - List tasks (all, pending, completed)');
-    console.log('  complete <id>  - Mark task as complete');
-    console.log('  delete <id>    - Delete a task');
+    console.log('   add <title>    - Add a new task');
+    console.log('   list [filter]  - List tasks (all, pending, completed)');
+    console.log('   complete <id>  - Mark task as complete');
+    console.log('   delete <id>    - Delete a task')�
     return;
   }
 
-  try {
-    switch (command) {
-      case 'add':
-        if (!args[1]) {
-          console.error('Task title required');
-          return;
-        }
-        addTask(args[1]);
-        break;
-      case 'list': {
-        const filter = (args[1] ?? 'all') as TaskFilter;
-        if (!['all', 'pending', 'completed'].includes(filter)) {
-          console.error('Invalid filter. Use one of: all, pending, completed');
-          return;
-        }
-        listTasks(filter);
-        break;
+  switch (command) {
+    case 'add':
+      if (!args[1]) {
+        console.error('Task title required');
+        return;
       }
-      case 'complete': {
-        if (!args[1]) {
-          console.error('Task ID required');
-          return;
-        }
-        const id = parseTaskId(args[1]);
-        if (id === null) {
-          console.error('Task ID must be a positive integer');
-          return;
-        }
-        completeTask(id);
-        break;
+      addTask(args[1]);
+      break;
+    case 'list':
+      listTasks(args[1] as 'all' | 'pending' | 'completed');
+      break;
+    case 'complete':
+      if (!args[1]) {
+        console.error('Task ID required');
+        return;
       }
-      case 'delete': {
-        if (!args[1]) {
-          console.error('Task ID required');
-          return;
-        }
-        const id = parseTaskId(args[1]);
-        if (id === null) {
-          console.error('Task ID must be a positive integer');
-          return;
-        }
-        deleteTask(id);
-        break;
+      completeTask(parseInt(args[1], 10));
+      break;
+    case 'delete':
+      if (!args[1]) {
+        console.error('Task ID required');
+        return;
       }
-      default:
-        console.error(`Unknown command: ${command}`);
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(message);
-    process.exitCode = 1;
+      deleteTask(parseInt(args[1], 10));
+      break;
+    default:
+      console.error(`Unknown command: ${command}`);
   }
 }
 
