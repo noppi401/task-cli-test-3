@@ -86,5 +86,5 @@ The CLI creates the storage file if it does not exist. Writes are persisted imme
 ## Testing
 
 ```bash
-nmp test
+npm test
 ```
