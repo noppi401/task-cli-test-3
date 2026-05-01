@@ -1,6 +1,6 @@
 import type { TaskFilter } from './types.js';
 import { TaskStore, ValidationError } from './tasks.js';
-import { formatTaskTable } from './format.js';
+import { formatTasksTable } from './format.js';
 
 export class TaskCLI {
   private readonly store: TaskStore;
@@ -24,7 +24,7 @@ export class TaskCLI {
 
   async listTasks(filter: TaskFilter = 'all'): Promise<void> {
     const tasks = this.store.getTasks(filter);
-    console.log(formatTaskTable(tasks));
+    console.log(formatTasksTable(tasks));
   }
 
   async completeTask(taskId: number): Promise<void> {
