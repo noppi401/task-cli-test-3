@@ -1,65 +1,60 @@
 import fs from 'fs/promises';
 import path from 'path';
-import type { Task, TaskStatus, TaskStorage } from './types.js';
+import { Task, TaskStore, FilterType } from './types.js';
 
-export class TaskStoreError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'TaskStoreError';
-  }
-}
+const TASKS_FILE = './tasks.json';
 
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ValidationError';
-  }
-}
-
-/**
- * Task Store for data persistence
- */
-export class TaskStore {
-  private filePath: string;
+export class TaskManager {
   private tasks: Task[] = [];
-
-  constructor(filePath?: string) {
-    this.filePath = filePath || path.join(process.cwd(), 'tasks.json');
-  }
+  private nextId: number = 1;
 
   async load(): Promise<void> {
     try {
-      const data = await fs.readFile(this.filePath, 'utf-8');
-      const parsed: TaskStorage = JSON.parse(data);
-      this.tasks = parsed.tasks || [];
-    } catch (err) {
-      if ((err as any).code === 'ENOENTB�( 
-�\˝\���H�NH[�H����]�\���ܙQ\��܊�Z[Y��Y\��Έ	�\��X
-NB�B�B��\�[���]�J
-N���Z\�O��Y��H�ۜ�]N�\���ܘY�HH�\��Έ\˝\���N]�Z]�˝ܚ]Q�[J\˙�[T]��Ӌ���[��Y�J]K�[�JNH�]�
-\��H����]�\���ܙQ\��܊�Z[Y��]�H\��Έ	�\��X
-NB�B���]\����[\��\���]\�	�[	�H	�[	�N�\���HY�
-�[\�OOH	�[	�H�]\��\˝\���B��6
-�\�ǹ뛗\��˙�[\�O���]\�OOH�[\�NB��Y\��]N���[��N�\���ۜ�YHX]�X^
-���\˝\��˛X\
-O��Y
-K
-H
-�N�ۜ�\�Έ\��HY�]K��]\Έ	�[�[����ܙX]Y]��]�]J
-K��T����[��
-K�N\˝\��˜\�
-\��N�]\��\��B����\]U\��Y��[X�\�N���Y�ۜ�\��H\˝\��˙�[�
-O��YOOHY
-NY�
-]\��H����]��[Y][ۑ\��܊\���]Q	�YH����[�
-NB�\�˜�]\�H	���\]Y	�\�˘��\]Y]H�]�]J
-K��T����[��
-NB��[]U\��Y��[X�\�N���Y�ۜ�[�^H\˝\��˙�[�[�^
-O��YOOHY
-NY�
-[�^OOHLJH����]��[Y][ۑ\��܊\���]Q	�YH����[�
-NB�\˝\��˜�X�J[�^JNB��]\�؞ZY
-Y��[X�\�N�\��[�Y�[�Y�]\��\˝\��˙�[�
-O��YOOHY
-NB��Q�][\���
-N�\���H�]\��\˝\���B�
+      const data = await fs.readFile(TASKS_FILE, 'utf-8');
+      const store: TaskStore = JSON.parse(data);
+      this.tasks = store.tasks;
+      this.nextId = Math.max(...this.tasks.map(t => t.id), 0) + 1;
+    } catch {
+      this.tasks = [];
+      this.nextId = 1;
+    }
+  }
+
+  async save(): Promise<void> {
+    const store: TaskStore = { tasks: this.tasks };
+    await fs.writeFile(TASKS_FILE, JSON.stringify(store, null, 2));
+  }
+
+  addTask(title: string): Task {
+    const task: Task = {
+      id: this.nextId++,
+      title,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    this.tasks.push(task);
+    return task;
+  }
+
+  getTasks(filter: FilterType = 'all'): Task[] {
+    if (filter === 'all') return this.tasks;
+    return this.tasks.filter(t => t.status === filter);
+  }
+
+  completeTask(id: number): Task | null {
+    const task = this.tasks.find(t => t.id === id);
+    if (task) {
+      task.status = 'completed';
+    }
+    return task || null;
+  }
+
+  deleteTask(id: number): boolean {
+    const index = this.tasks.findIndex(t => t.id === id);
+    if (index >= 0) {
+      this.tasks.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+}

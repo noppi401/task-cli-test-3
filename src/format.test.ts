@@ -1,57 +1,79 @@
-import { formatTaskTable, parseTaskFilter } from './format.js';
-import type { Task } from './types.js';
+import { formatTasksTable, formatTable, formatTaskAdded, formatTaskCompleted, formatTaskDeleted, formatError } from './format.js';
+import { Task } from './types.js';
 
-describe('formatTaskTable', () => {
-  it('should display empty state', () => {
-    const result = formatTaskTable([]);
-    expect(result).toContain('No tasks');
+describe('format', () => {
+  describe('formatTasksTable', () => {
+    it('should return empty message when no tasks', () => {
+      const result = formatTasksTable([]);
+      expect(result).toBe('No tasks found.');
+    });
+
+    it('should format tasks in table', () => {
+      const tasks: Task[] = [
+        { id: 1, title: 'Task 1', status: 'pending', createdAt: '2024-01-01T10:00:00Z' }
+      ];
+      const result = formatTasksTable(tasks);
+      expect(result).toContain('ID');
+      expect(result).toContain('Task 1');
+      expect(result).toContain('pending');
+    });
+
+    it('should include all task fields in output', () => {
+      const tasks: Task[] = [
+        { id: 2, title: 'Buy groceries', status: 'completed', createdAt: '2024-01-15T14:30:00Z' }
+      ];
+      const result = formatTasksTable(tasks);
+      expect(result).toContain('2');
+      expect(result).toContain('Buy groceries');
+      expect(result).toContain('completed');
+    });
   });
 
-  it('should format tasks as table', () => {
-    const tasks: Task[] = [
-      {
-        id: 1,
-        title: 'Buy groceries',
-        status: 'pending',
-        createdAt: '2024-01-01T10:00:00Z',
-      },
-      {
-        id: 2,
-        title: 'Finish project',
-        status: 'completed',
-        createdAt: '2024-01-02T10:00:00Z',
-        completedAt: '2024-01-04T10:00:00Z',
-      },
-    ];
+  describe('formatTable', () => {
+    it('should format headers and rows correctly', () => {
+      const headers = ['Name', 'Age'];
+      const rows = [['John', '30'], ['Jane', '25']];
+      const result = formatTable(headers, rows);
+      expect(result).toContain('Name');
+      expect(result).toContain('Age');
+      expect(result).toContain('John');
+      expect(result).toContain('Jane');
+    });
 
-    const result = formatTaskTable(tasks);
-    expect(result).toContain('ID');
-    expect(result).toContain('Title');
-    expect(result).toContain('Status');
-    expect(result).toContain('Buy groceries');
-    expect(result).toContain('Finish project');
-    expect(result).toContain('completed');
-  });
-});
-
-describe('parseTaskFilter', () => {
-  it('should return all for undefined', () => {
-    const result = parseTaskFilter(undefined);
-    expect(result).toBe('all');
+    it('should pad columns properly', () => {
+      const headers = ['A', 'B'];
+      const rows = [['short', 'verylongvalue']];
+      const result = formatTable(headers, rows);
+      const lines = result.split('\n');
+      expect(lines[0].length).toBe(lines[1].length);
+    });
   });
 
-  it('should parse pending filter', () => {
-    const result = parseTaskFilter('pending');
-    expect(result).toBe('pending');
+  describe('formatTaskAdded', () => {
+    it('should format task added message', () => {
+      const result = formatTaskAdded(5);
+      expect(result).toBe('Task added (ID: 5)');
+    });
   });
 
-  it('should parse completed filter', () => {
-    const result = parseTaskFilter('completed');
-    expect(result).toBe('completed');
+  describe('formatTaskCompleted', () => {
+    it('should format task completed message', () => {
+      const result = formatTaskCompleted(3);
+      expect(result).toBe('Task 3 marked as complete');
+    });
   });
 
-  it('should default to all for invalid filter', () => {
-    const result = parseTaskFilter('invalid');
-    expect(result).toBe('all');
+  describe('formatTaskDeleted', () => {
+    it('should format task deleted message', () => {
+      const result = formatTaskDeleted(7);
+      expect(result).toBe('Task 7 deleted');
+    });
+  });
+
+  describe('formatError', () => {
+    it('should format error message', () => {
+      const result = formatError('Something went wrong');
+      expect(result).toBe('Error: Something went wrong');
+    });
   });
 });

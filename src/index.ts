@@ -1,92 +1,92 @@
 #!/usr/bin/env node
-import { TaskCLI } from './cli.js';
-import { parseTaskFilter } from './format.js';
 
-function printHelp(): void {
-  console.log(`Task Management CLI
+import { TaskManager } from './tasks.js';
+import {
+  formatTasksTable,
+  formatTaskAdded,
+  formatTaskCompleted,
+  formatTaskDeleted,
+  formatError
+} from './format.js';
+import { FilterType } from './types.js';
 
-Usage:
-  task-cli add <description>
-  task-cli list [all|pending|completed|--filter=<filter>]
-  task-cli complete <id>
-  task-cli delete <id>
-  task-cli help
+async function main() {
+  const args = process.argv.slice(2);
 
-Commands:
-  add <description>       Add a new task
-  list                    List tasks, optionally filtered by status
-  complete <id>           Mark a task as completed
-  delete <id>             Delete a task
-  help                   Show this help message`);
-}
-
-function parseId(value: string | undefined): number {
-  const id = Number.parseInt(value ?? '', 10);
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error('Invalid task ID');
-  }
-  return id;
-}
-
-function parseListFilterArg(args: string[]): string | undefined {
-  const [firstArg, secondArg] = args;
-
-  if (!firstArg) {
-    return undefined;
+  if (args.length === 0) {
+    console.log('Usage: task-cli <command> [args]');
+    console.log('Commands:');
+    console.log('  add <title>      Add a new task');
+    console.log('  list [filter]    List tasks (all/pending/completed)');
+    console.log('  complete <id>    Mark task as completed');
+    console.log('  delete <id>      Delete a task');
+    process.exit(0);
   }
 
-  if (firstArg === '--filter') {
-    return secondArg;
-  }
+  const manager = new TaskManager();
+  await manager.load();
 
-  if (firstArg.startsWith('--filter=')) {
-    return firstArg.slice('--filter='.length);
-  }
+  const command = args[0];
 
-  return firstArg;
-}
-
-async function main(): Promise<void> {
-  const [command, ...args] = process.argv.slice(2);
-
-  if (!command || command === '--help' || command === '-h' || command === 'help') {
-    printHelp();
-    return;
-  }
-
-  const cli = new TaskCLI();
-  await cli.init();
-
-  switch (command) {
-    case 'add': {
-      const title = args.join(' ');
-      if (!title.trim()) {
-        throw new Error('Please provide a task description');
+  try {
+    if (command === 'add') {
+      if (args.length < 2) {
+        console.log(formatError('Task title required'));
+        process.exit(1);
       }
-      await cli.addTask(title);
-      return;
+      const task = manager.addTask(args.slice(1).join(' '));
+      await manager.save();
+      console.log(formatTaskAdded(task.id));
+    } else if (command === 'list') {
+      const filter: FilterType = (args[1] || 'all') as FilterType;
+      if (!['all', 'pending', 'completed'].includes(filter)) {
+        console.log(formatError('Invalid filter. Use: all, pending, or completed'));
+        process.exit(1);
+      }
+      const tasks = manager.getTasks(filter);
+      console.log(formatTasksTable(tasks));
+    } else if (command === 'complete') {
+      if (args.length < 2) {
+        console.log(formatError('Task ID required'));
+        process.exit(1);
+      }
+      const id = parseInt(args[1], 10);
+      if (isNaN(id)) {
+        console.log(formatError('Invalid task ID'));
+        process.exit(1);
+      }
+      if (manager.completeTask(id)) {
+        await manager.save();
+        console.log(formatTaskCompleted(id));
+      } else {
+        console.log(formatError(`Task ${id} not found`));
+        process.exit(1);
+      }
+    } else if (command === 'delete') {
+      if (args.length < 2) {
+        console.log(formatError('Task ID required'));
+        process.exit(1);
+      }
+      const id = parseInt(args[1], 10);
+      if (isNaN(id)) {
+        console.log(formatError('Invalid task ID'));
+        process.exit(1);
+      }
+      if (manager.deleteTask(id)) {
+        await manager.save();
+        console.log(formatTaskDeleted(id));
+      } else {
+        console.log(formatError(`Task ${id} not found`));
+        process.exit(1);
+      }
+    } else {
+      console.log(formatError(`Unknown command: ${command}`));
+      process.exit(1);
     }
-
-    case 'list': {
-      await cli.listTasks(parseTaskFilter(parseListFilterArg(args)));
-      return;
-    }
-
-    case 'complete':
-      await cli.completeTask(parseId(args[0]));
-      return;
-
-    case 'delete':
-      await cli.deleteTask(parseId(args[0]));
-      return;
-
-    default:
-      throw new Error(`Unknown command: ${command}`);
+  } catch (error) {
+    console.log(formatError(error instanceof Error ? error.message : 'Unknown error'));
+    process.exit(1);
   }
 }
 
-main().catch((err: unknown) => {
-  const message = err instanceof Error ? err.message : String(err);
-  console.error(`Error: ${message}`);
-  process.exit(1);
-});
+main();
