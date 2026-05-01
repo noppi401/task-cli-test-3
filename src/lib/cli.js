@@ -15,6 +15,13 @@ function askConfirmation(question) {
   });
 }
 
+function parseTaskId(value) {
+  if (!/^\d+$/.test(value || '')) {
+    throw new Error('Invalid task ID');
+  }
+  return Number(value);
+}
+
 export async function run(args) {
   const command = args[0];
 
@@ -30,7 +37,7 @@ export async function run(args) {
     }
     case 'list': {
       const filter = args[1] === '--filter' ? args[2] : null;
-      if (filter && !['pending', 'completed'].includes(filter)) {
+      if (filter && ! ['pending', 'completed'].includes(filter)) {
         throw new Error('Filter must be pending or completed');
       }
       const tasks = await listTasks(filter);
@@ -42,25 +49,19 @@ export async function run(args) {
       console.log('ID  Title                 Status');
       console.log('-----------------------------------');
       tasks.forEach((task) => {
-        console.log($`{task.id}  ${task.title.padEnd(20)} ${task.status}`);
+        console.log(`${task.id}  ${task.title.padEnd(20)} ${task.status}`);
       });
       break;
     }
     case 'complete': {
-      const taskId = parseInt(args[1], 10);
-      if (Number.isNaN(taskId)) {
-        throw new Error('Invalid task ID');
-      }
+      const taskId = parseTaskId(args[1]);
       await completeTask(taskId);
       console.log(`Task ${taskId} marked as complete`);
       break;
     }
     case 'delete': {
-      const taskId = parseInt(args[1], 10);
+      const taskId = parseTaskId(args[1]);
       const force = args.includes('--force');
-      if (Number.isNaN(taskId)) {
-        throw new Error('Invalid task ID');
-      }
 
       const confirmed = force || await askConfirmation(
         `Are you sure you want to delete task ${taskId}? (y/n): `
