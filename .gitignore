@@ -4,3 +4,4 @@ tasks.json
 npm-debug.log
 *.err
 package-lock.json
+.
