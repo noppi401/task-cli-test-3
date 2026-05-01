@@ -1,50 +1,144 @@
-import { TaskStore } from './tasks.js'
-import { formatTasksTable, formatTaskAdded, formatTaskCompleted, formatTaskDeleted, formatError } from './format.js'
-import { FilterType } from './types.js'
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
 
-export class CLI {
-  private store: TaskStore
+interface Task {
+  id: number;
+  title: string;
+  status: 'pending' | 'completed';
+  createdAt: string;
+}
 
-  constructor(store: TaskStore) {
-    this.store = store
+interface TaskData {
+  tasks: Task[];
+}
+
+const TASKS_FILE = resolve('./tasks.json');
+
+function loadTasks(): TaskData {
+  if (!existsSync(TASKS_FILE)) {
+    return { tasks: [] };
+  }
+  try {
+    const data = readFileSync(TASKS_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return { tasks: [] };
+  }
+}
+
+function saveTasks(data: TaskData): void {
+  writeFileSync(TASKS_FILE, JSON.stringify(data, null, 2));
+}
+
+function getNextId(tasks: Task[]): number {
+  if (tasks.length === 0) return 1;
+  return Math.max(...tasks.map(t => t.id)) + 1;
+}
+
+function addTask(title: string): void {
+  const data = loadTasks();
+  const id = getNextId(data.tasks);
+  const task: Task = {
+    id,
+    title,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+  data.tasks.push(task);
+  saveTasks(data);
+  console.log(`Task added (ID: ${id})`);
+}
+
+function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
+  const data = loadTasks();
+  let tasks = data.tasks;
+
+  if (filter === 'pending') {
+    tasks = tasks.filter(t => t.status === 'pending');
+  } else if (filter === 'completed') {
+    tasks = tasks.filter(t => t.status === 'completed');
   }
 
-  async run(args: string[]): Promise<string> {
-    await this.store.load()
+  if (tasks.length === 0) {
+    console.log('No tasks found.');
+    return;
+  }
 
-    const command = args[0]
-    const argsRest = args.slice(1)
+  console.log('\\nID  Title           Status');
+  console.log('--  -----        ------');
+  tasks.forEach(task => {
+    const title = task.title.substring(0, 16).padEnd(16);
+    console.log(`${task.id}   ${title}  ${task.status}`);
+  });
+  console.log();
+}
 
-    switch (command) {
-      case 'add':
-        if (!args�YVY[��[��
-H�]\���ܛX]\��܊	�\��]H\��\]Z\�Y	�B�B���ۜ�\��H]�Z]\˜�ܙK�Y\��\��ԙ\����[�	�	�JB��]\���ܛX]\��YY
-\�˚Y
-B���\�H	�\�	΂��ۜ��[\�H
-\��ԙ\��H��	�[	�H\��[\�\B�Y�
-V��[	�	�[�[���	���\]Y	�K�[��Y\��[\�JH�]\���ܛX]\��܊[��[Y�[\��	ٚ[\�X
-B�B���ۜ�\���H]�Z]\˜�ܙK�\�\����[\�B��]\���ܛX]\���X�J\���B���\�H	���\]I΂�Y�
-X\��ԙ\��[��
-H�]\���ܛX]\��܊	�\��Q\��\]Z\�Y	�B�B���ۜ�YH\��R[�
-\��ԙ\��KL
-B�Y�
-\ӘS�Y
-JH�]\���ܛX]\��܊	�[��[Y\��Q	�B�B���ۜ���\]Y\��H]�Z]\˜�ܙK���\]U\��Y
-B�Y�
-X��\]Y\��H�]\���ܛX]\��܊\��	�YH����[�
-B�B��]\���ܛX]\����\]Y
-Y
-B���\�H	�[]I΂�Y�
-X\��ԙ\��[��
-H�]\���ܛX]\��܊	�\��Q\��\]Z\�Y	�B�B���ۜ�[]RYH\��R[�
-\��ԙ\��KL
-B�Y�
-\ӘS�[]RY
-JH�]\���ܛX]\��܊	�[��[Y\��Q	�B�B���ۜ�[]YH]�Z]\˜�ܙK�[]U\��[]RY
-B�Y�
-Y[]Y
-H�]\���ܛX]\��܊\��	�[]RYH����[�
-B�B��]\���ܛX]\��[]Y
-[]RY
-B��Y�][���]\���ܛX]\��܊[�ۛ�ۈ��[X[��	���[X[�X
-B�B�B�
+function completeTask(id: number): void {
+  const data = loadTasks();
+  const task = data.tasks.find(t => t.id === id);
+  if (!task) {
+    console.error(`Task ${id} not found.`);
+    return;
+  }
+  task.status = 'completed';
+  saveTasks(data);
+  console.log(`Task ${id} marked as complete`);
+}
+
+function deleteTask(id: number): void {
+  const data = loadTasks();
+  const index = data.tasks.findIndex(t => t.id === id);
+  if (index === -1) {
+    console.error(`Task ${id} not found.`);
+    return;
+  }
+  data.tasks.splice(index, 1);
+  saveTasks(data);
+  console.log(`Task ${id} deleted`);
+}
+
+function main(): void {
+  const args = process.argv.slice(2);
+  const command = args[0];
+
+  if (!command) {
+    console.log('Usage: node index.js <command> [args]');
+    console.log('Commands:');
+    console.log('  add <title>    - Add a new task');
+    console.log('  list [filter]  - List tasks (all, pending, completed)');
+    console.log('  complete <id>  - Mark task as complete');
+    console.log('  delete <id>    - Delete a task');
+    return,
+  }
+
+  switch (command) {
+    case 'add':
+      if (!args[1]) {
+        console.error('Task title required');
+        return,
+      }
+      addTask(args[1]);
+      break;
+    case 'list':
+      listTasks(args[1] as 'all' | 'pending' | 'completed');
+      break;
+    case 'complete':
+      if (!args[1]) {
+        console.error('Task ID required');
+        return;
+      }
+      completeTask(parseInt(args[1], 10));
+      break;
+    case 'delete':
+      if (!args[1]) {
+        console.error('Task ID required');
+        return,
+      }
+      deleteTask(parseInt(args[1], 10));
+      break;
+    default:
+      console.error(`Unknown command: ${command}`);
+  }
+}
+
+main();
