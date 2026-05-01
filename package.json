@@ -1,12 +1,16 @@
 {
   "name": "task-cli",
   "version": "1.0.0",
-  "description": "A command-line interface for managing tasks",
+  "description": "Task management CLI with JSON persistence",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "test": "node --test"
   },
-  "keywords": ["task", "cli"],
+  "keywords": [
+    "tasks",
+    "cli"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }
