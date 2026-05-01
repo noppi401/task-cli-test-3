@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "A command-line interface for managing tasks with persistent JSON storage",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/bin/task-cli.js",
   "bin": {
-    "task-cli": "dist/index.js"
+    "task-cli": "dist/bin/task-cli.js"
   },
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "tsc",
-    "test": "npm run build && node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "start": "node dist/bin/task-cli.js",
+    "test": "jest",
+    "build": "tsc"
   },
   "engines": {
     "node": ">=16.0.0"
