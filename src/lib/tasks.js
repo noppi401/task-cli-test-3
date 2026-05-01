@@ -1,106 +1,67 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const DEFAULT_TASK_FILE = path.resolve(process.cwd(), 'tasks.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const TASKS_FILE = path.join(__dirname, '../../tasks.json');
 
-class TaskStoreError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'TaskStoreError';
-  }
-}
-
-function getTaskFile(options = {}) {
-  return path.resolve(options.taskFile || process.env.TASK_FILE || DEFAULT_TASK_FILE);
-}
-
-function normalizeStore(data) {
-  if (Array.isArray(data)) {
-    return { tasks: data };
-  }
-
-  if (!data || !Array.isArray(data.tasks)) {
-    throw new TaskStoreError('Task file must contain a tasks array.');
-  }
-
-  return data;
-}
-
-function readStore(options = {}) {
-  const taskFile = getTaskFile(options);
-
-  if (!fs.existsSync(taskFile)) {
-    return { tasks: [] };
-  }
-
-  try {
-    const raw = fs.readFileSync(taskFile, 'utf8');
-    if (!raw.trim()) {
-      return { tasks: [] };
-    }
-    return normalizeStore(JSON.parse(raw));
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      throw new TaskStoreError(`Failed to parse task file: ${taskFile}`);
-    }
-    throw new TaskStoreError(`Failed to read task file: ${err.message}`);
-  }
-}
-
-function writeStore(store, options = {}) {
-  const taskFile = getTaskFile(options);
-
-  try {
-    fs.mkdirSync(path.dirname(taskFile), { recursive: true });
-    fs.writeFileSync(taskFile, `${JSON.stringify(store, null, 2)}\n`, 'utf8');
-  } catch (err) {
-    throw new TaskStoreError(`Failed to write task file: ${err.message}`);
-  }
-}
-
-function nextId(tasks) {
-  return tasks.reduce((max, task) => Math.max(max, Number(task.id) || 0), 0) + 1;
-}
-
-function addTask(title, options = {}) {
-  const store = readStore(options);
-  const task = {
-    id: nextId(store.tasks),
-    title,
+export async function addTask(title) {
+  const tasks = await loadTasks();
+  const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+  const newTask = {
+    id: newId,
+    title: title,
     status: 'pending',
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString()
   };
-  store.tasks.push(task);
-  writeStore(store, options);
-  return task;
+  tasks.push(newTask);
+  await saveTasks(tasks);
+  return newTask;
 }
 
-function listTasks(filter = 'all', options = {}) {
-  const store = readStore(options);
-  return filter === 'all' ? store.tasks : store.tasks.filter(task => task.status === filter);
+export async function listTasks(filter) {
+  const tasks = await loadTasks();
+  if (!filter) {
+    return tasks;
+  }
+  return tasks.filter(t => t.status === filter);
 }
 
-function completeTask(id, options = {}) {
-  const store = readStore(options);
-  const task = store.tasks.find(item => item.id === id);
+export async function completeTask(taskId) {
+  const tasks = await loadTasks();
+  const task = tasks.find(t => t.id === taskId);
   if (!task) {
-    throw new TaskStoreError(`Task ${id} not found.`);
+    throw new Error(`Task ${taskId} not found`);
   }
   task.status = 'completed';
   task.completedAt = new Date().toISOString();
-  writeStore(store, options);
-  return task;
+  await saveTasks(tasks);
 }
 
-function deleteTask(id, options = {}) {
-  const store = readStore(options);
-  const index = store.tasks.findIndex(task => task.id === id);
+export async function deleteTask(taskId) {
+  const tasks = await loadTasks();
+  const index = tasks.findIndex(t => t.id === taskId);
   if (index === -1) {
-    throw new TaskStoreError(`Task ${id} not found.`);
+    throw new Error(`Task ${taskId} not found`);
   }
-  const [deletedTask] = store.tasks.splice(index, 1);
-  writeStore(store, options);
-  return deletedTask;
+  tasks.splice(index, 1);
+  await saveTasks(tasks);
 }
 
-module.exports = { TaskStoreError, addTask, completeTask, deleteTask, getTaskFile, listTasks, readStore, writeStore };
+async function loadTasks() {
+  try {
+    const data = await fs.readFile(TASKS_FILE, 'utf-8');
+    const json = JSON.parse(data);
+    return Array.isArray(json) ? json : json.tasks || [];
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function saveTasks(tasks) {
+  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2), 'utf-8');
+}

@@ -1,73 +1,73 @@
-const { addTask, completeTask, deleteTask, listTasks, TaskStoreError } = require('./tasks');
+import { addTask, listTasks, completeTask, deleteTask } from './tasks.js';
+import readline from 'readline';
 
-function parseId(value) {
-  const id = Number(value);
-  if (!Number.isInteger(id) || id <= 0) {
-    throw new Error('Task ID must be a positive integer.');
-  }
-  return id;
-}
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
-function printHelp(output = console.log) {
-  output('Usage: node src/index.js <command> [args]');
-  output('Commands: add, list, complete, delete');
-}
-
-function run(argv = [], options = {}) {
-  const output = options.output || console.log;
-  const error = options.error || console.error;
-  const command = argv[0];
-
-  try {
-    if (!command || command === 'help' || command === '--help') {
-      printHelp(output);
-      return 0;
-    }
-
-    if (command === 'add') {
-      const title = argv.slice(1).join(' ').trim();
-      if (!title) {
-        throw new Error('Task description is required.');
+export async function run(args) {
+  const command = args[0];
+  
+  switch (command) {
+    case 'add': {
+      const taskTitle = args.slice(1).join(' ');
+      if (!taskTitle) {
+        throw new Error('Task title is required');
       }
-      const task = addTask(title, options);
-      output(`Task added (ID: ${task.id})`);
-      return 0;
+      const task = await addTask(taskTitle);
+      console.log(`Task added (ID: ${task.id})`);
+      break;
     }
-
-    if (command === 'list') {
-      const filterIndex = argv.indexOf('--filter');
-      const filter = filterIndex === -1 ? 'all' : argv[filterIndex + 1];
-      if (!['all', 'pending', 'completed'].includes(filter)) {
-        throw new Error('Invalid filter. Use pending, completed, or all.');
-      }
-      const tasks = listTasks(filter, options);
+    case 'list': {
+      const filter = args[1] === '--filter' ? args[2] : null;
+      const tasks = await listTasks(filter);
       if (tasks.length === 0) {
-        output('No tasks found.');
-        return 0;
+        console.log('No tasks found');
+        break;
       }
-      output('ID\tTitle\tStatus');
-      tasks.forEach(task => output(`${task.id}\t${task.title}\t${task.status}`));
-      return 0;
+      console.log('\nTask List:\n');
+      console.log('ID  Title            Status');
+      console.log('-----------------------------------');
+      tasks.forEach(task => {
+        const status = task.status === 'completed' ? ' �' : ' ╰';
+        console.log(`${task.id}  ${task.title.padEnd(20)} ${status}`);
+      });
+      break;
     }
-
-    if (command === 'complete') {
-      const task = completeTask(parseId(argv[1]), options);
-      output(`Task ${task.id} marked as complete`);
-      return 0;
+    case 'complete': {
+      const taskId = parseInt(args[1], 10);
+      if (isNaN(taskId)) {
+        throw new Error('Invalid task ID');
+      }
+      await completeTask(taskId);
+      console.log(`Task ${taskId} marked as complete`);
+      break;
     }
-
-    if (command === 'delete') {
-      const task = deleteTask(parseId(argv[1]), options);
-      output(`Task ${task.id} deleted`);
-      return 0;
+    case 'delete': {
+      const taskId = parseInt(args[1], 10);
+      const force = args.includes('--force');
+      if (isNaN(taskId)) {
+        throw new Error('Invalid task ID');
+      }
+      let confirm = force;
+      if (!force) {
+        confirm = await new Promise((resolve) => {
+          rl.question(
+            `Are you sure you want to delete task ${taskId}? (y/n): `,
+            (answer) => {
+              resolve(answer.toLowerCase() === 'y');
+            }
+          );
+        });
+      }
+      if (confirm) {
+        await deleteTask(taskId);
+        console.log(`Task ${taskId} deleted`);
+      } else {
+        console.log('Deletion canceled');
+      }
+      rd.close();
+      break;
     }
-
-    throw new Error(`Unknown command: ${command}`);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    error(`Error: ${message}`);
-    return 1;
-  }
-}
-
-module.exports = { parseId, printHelp, run };
+   `�O��F�&�r�WrW'&�"�V���v�6����C�G�6����G����Ч
