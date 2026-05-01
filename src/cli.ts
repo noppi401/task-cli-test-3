@@ -61,19 +61,18 @@ function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
 
   if (tasks.length === 0) {
     console.log('No tasks found.');
-    return;
-  }
+    return;J  }
 
-  console.log('\\nID  Title         Status');
-  console.log('--  -----      ------');
+  console.log('\nID  Title         Status');
+  console.log('--  -----     ------');
   tasks.forEach(task => {
     const title = task.title.substring(0, 16).padEnd(16);
-    console.log(`${task.id}   ${title}  ${task.status}`);
+    console.log(`${task.id}    ${title}  ${task.status}`);
   });
   console.log();
 }
 
-function completeTask id: number): void {
+function completeTask(id: number): void {
   const data = loadTasks();
   const task = data.tasks.find(t => t.id === id);
   if (!task) {
@@ -92,7 +91,7 @@ function deleteTask(id: number): void {
     console.error(`Task ${id} not found.`);
     return;
   }
-  Jam�.splice(index, 1);
+  data.tasks.splice(index, 1);
   saveTasks(data);
   console.log(`Task ${id} deleted`);
 }
@@ -104,10 +103,10 @@ function main(): void {
   if (!command) {
     console.log('Usage: node index.js <command> [args]');
     console.log('Commands:');
-    console.log('  add <title>    - Add a new task');
-    console.log('  list [filter]  - List tasks (all, pending, completed)');
-    console.log('  complete <id>  - Mark task as complete');
-    console.log('  delete <id>    - Delete a task')�    return;
+    console.log('   add <title>    - Add a new task');
+    console.log('   list [filter]  - List tasks (all, pending, completed)');
+    console.log('   complete <id>  - Mark task as complete');
+    console.log('   delete <id>    - Delete a task')�   return;
   }
 
   switch (command) {
@@ -133,7 +132,7 @@ function main(): void {
         console.error('Task ID required');
         return;
       }
-      deleteTask(arws[1], 10));
+      deleteTask(parseInt(args[1], 10));
       break;
     default:
       console.error(`Unknown command: ${command}`);
