@@ -27,7 +27,7 @@ function loadTasks(): TaskData {
 }
 
 function saveTasks(data: TaskData): void {
-  writeFileSync(TASKS_FILE, JSON.stringify(data, null, 2));
+  writeFileSync(TASKs_FILE, JSON.stringify(data, null, 2));
 }
 
 function getNextId(tasks: Task[]): number {
@@ -61,82 +61,7 @@ function listTasks(filter?: 'all' | 'pending' | 'completed'): void {
 
   if (tasks.length === 0) {
     console.log('No tasks found.');
-    return;J  }
-
-  console.log('\nID  Title         Status');
-  console.log('--  -----     ------');
-  tasks.forEach(task => {
-    const title = task.title.substring(0, 16).padEnd(16);
-    console.log(`${task.id}    ${title}  ${task.status}`);
-  });
-  console.log();
-}
-
-function completeTask(id: number): void {
-  const data = loadTasks();
-  const task = data.tasks.find(t => t.id === id);
-  if (!task) {
-    console.error(`Task ${id} not found.`);
     return;
   }
-  task.status = 'completed';
-  saveTasks(data);
-  console.log(`Task ${id} marked as complete`);
-}
 
-function deleteTask(id: number): void {
-  const data = loadTasks();
-  const index = data.tasks.findIndex(t => t.id === id);
-  if (index === -1) {
-    console.error(`Task ${id} not found.`);
-    return;
-  }
-  data.tasks.splice(index, 1);
-  saveTasks(data);
-  console.log(`Task ${id} deleted`);
-}
-
-function main(): void {
-  const args = process.argv.slice(2);
-  const command = args[0];
-
-  if (!command) {
-    console.log('Usage: node index.js <command> [args]');
-    console.log('Commands:');
-    console.log('   add <title>    - Add a new task');
-    console.log('   list [filter]  - List tasks (all, pending, completed)');
-    console.log('   complete <id>  - Mark task as complete');
-    console.log('   delete <id>    - Delete a task')�   return;
-  }
-
-  switch (command) {
-    case 'add':
-      if (!args[1]) {
-        console.error('Task title required');
-        return;
-      }
-      addTask(args[1]);
-      break;
-    case 'list':
-      listTasks(args[1] as 'all' | 'pending' | 'completed');
-      break;
-    case 'complete':
-      if (!args[1]) {
-        console.error('Task ID required');
-        return;
-      }
-      completeTask(parseInt(args[1], 10));
-      break;
-    case 'delete':
-      if (!args[1]) {
-        console.error('Task ID required');
-        return;
-      }
-      deleteTask(parseInt(args[1], 10));
-      break;
-    default:
-      console.error(`Unknown command: ${command}`);
-  }
-}
-
-main();
+  console.lm���q�%��Q�ѱ��������Mх��̜��(�����ͽ�������������������������������(��х̹ͭ�������хͬ�����(��������Ёѥѱ���хͬ�ѥѱ���Չ��ɥ�������ؤ��������ؤ�(�������ͽ����������хͬ���􀀀���ѥѱ�􀀑�хͬ��х�������(�����(�����ͽ���������)�()�չ�ѥ���������ѕQ�ͬ���聹յ��Ȥ�ٽ����(������Ё��ф�􁱽��Q�̠ͭ��(������Ёхͬ�􁑅ф�х̹ͭ�����Ѐ���й�����􁥐��(�������хͬ���(�������ͽ�����ɽȡ�Q�ͬ�����􁹽Ё��չ�����(����ɕ��ɸ�(���(��хͬ��х��̀􀝍�����ѕ���(��ٕͅQ�̡ͭ��ф��(�����ͽ��������Q�ͬ�����􁵅ɭ����́������ѕ���)�()�չ�ѥ�������ѕQ�ͬ���聹յ��Ȥ�ٽ����(������Ё��ф�􁱽��Q�̠ͭ��(������Ё������􁑅ф�х̹ͭ����%����Ѐ���й�����􁥐��(���������������Ĥ��(�������ͽ�����ɽȡ�Q�ͬ�����􁹽Ё��չ�����(����ɕ��ɸ�(���(����ф�х̹ͭ�����������ఀĤ�(��ٕͅQ�̡ͭ��ф��(�����ͽ��������Q�ͬ�����􁑕��ѕ����)�()�չ�ѥ����������ٽ����(������Ё�ɝ̀��ɽ���̹�ɝعͱ����Ȥ�(������Ё���������ɝ�l�t�((�����������������(�������ͽ��������Uͅ��聹��������๩̀񍽵������m�ɝ�t���(�������ͽ���������������蜤�(�������ͽ����������������ѥѱ���������������܁хͬ���(�������ͽ��������������Ёm���ѕ�t����1��Ёхͭ̀���������������������ѕ�����(�������ͽ�����������������є�������5�ɬ�хͬ��́������є���(�������ͽ���������������є������������є���хͬ���(����ɕ��ɸ�(���(��(��d=�э�������������(������͔�������(������������ɝ�l�t���(�����������ͽ�����ɽȠ�Q�ͬ�ѥѱ��ɕ�եɕ����(��������ɕ��ɸ�(�������(���������Q�ͬ��ɝ�l�t��(�������ɕ���(������͔�����М�(����������Q�̡ͭ�ɝ�l�t��̀���������������������������ѕ����(�������ɕ���(������͔��������є��(������������ɝ�l�t���(�����������ͽ�����ɽȠ�Q�ͬ�%�ɕ�եɕ����(��������ɕ��ɸ�(�������(������������ѕQ�ͬ����͕%�С�ɝ�l�t�������(�������ɕ���(������͔������є��(������������ɝ�l�t���(�����������ͽ�����ɽȠ�Q�ͬ�%�ɕ�եɕ����(��������ɕ��ɸ�(�������(����������ѕQ�ͬ����͕%�С�ɝ�l�t�������(�������ɕ���(��������ձ��(���������ͽ�����ɽȡ�U����ݸ��������耑퍽���������(���)�()�������
