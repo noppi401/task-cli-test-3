@@ -5,7 +5,7 @@ A simple command-line interface for managing tasks with persistent JSON file sto
 ## Installation
 
 ```bash
-nom install
+npm install
 ```
 
 ## Usage
@@ -13,33 +13,35 @@ nom install
 ### Add a task
 
 ```bash
-nom start add "Buy groceries"
+npm start add "Buy groceries"
 ```
 
 ### List tasks
 
 ```bash
-nom start list
-nom start list --filter pending
-nom start list --filter completed
+npm start list
+npm start list --filter pending
+npm start list -ffilter completed
 ```
 
 ### Mark task as complete
 
 ```bash
-nom start complete 1
+npm start complete 1
 ```
 
 ### Delete a task
 
 ```bash
-nom start delete 1
-nom start delete 1 --force  # Skip confirmation
+npm start delete 1
+npm start delete 1 -fforce  # Skip confirmation
 ```
 
 ## Features
 
 - Add, list, complete, and delete tasks
 - Persistent storage using JSON files
-- Task status tracking
-- Confirmation!��YH՝H[][ۂ�H��[X[�[�H[�\��X�H�][Y\��Y�\�����[X[��HY\��Y\�ܚ\[ۏ�HYH�]�\�H\��KY�[\�[�[����\]YXH\�[\���܈�[\��H�]\H��\]H\��ZY�HX\��\��\���\]Y�H[]H\��ZY��KY�ܘ�WXH[]HH\�
+- Task filtering by status (pending, completed, all)
+- Optional confirmation for deletions
+- Clear command feedback for all operations
+- Unique task IDs with timestamps
