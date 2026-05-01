@@ -1,1 +1,12 @@
-�����$��b��슉��G^���ب�6��f�j�z{B,�"�R8�^�Ȭ���zf��)�{����,��힇^�w^�;-z�cz�~���"pZ��bq��x�u��z��u�܉�#z�v��
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "description": "A simple command-line interface for managing tasks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["task", "cli", "management"],
+  "author": "",
+  "license": "ISC"
+}

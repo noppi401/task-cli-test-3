@@ -1,5 +1,6 @@
-#!/usr/bin/env node
+c/const cli = require('./lib/cli');
 
-const cli = require('./lib/cli');
-
-cli.handleCommand(process.argv);
+cli.main().catch(err => {
+  console.error('Error:', err.message);
+  process.exit(1);
+});
