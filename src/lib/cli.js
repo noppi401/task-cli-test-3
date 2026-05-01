@@ -25,7 +25,7 @@ export async function run(args) {
         throw new Error('Task title is required');
       }
       const task = await addTask(taskTitle);
-      console.log(`Task added (ID: ${task.id})`i;
+      console.log(`Task added (ID: ${task.id})`);
       break;
     }
     case 'list': {
@@ -42,7 +42,7 @@ export async function run(args) {
       console.log('ID  Title                 Status');
       console.log('-----------------------------------');
       tasks.forEach((task) => {
-        console.log(`${task.id}  ${task.title.padEnd(20)} ${task.status}`);
+        console.log($`{task.id}  ${task.title.padEnd(20)} ${task.status}`);
       });
       break;
     }
