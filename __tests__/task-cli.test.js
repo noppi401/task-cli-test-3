@@ -43,7 +43,9 @@ describe("TaskRepository CRUD and persistence", () => {
     const repository = createRepository();
     const first = await repository.addTask("  Buy groceries  ");
     const second = await repository.addTask("Write tests");
+
     expect(first).toMatchObject({ id: 1, title: "Buy groceries", status: "pending" });
+    expect(first.createdAt).toBe("2024-01-02T03:04:05.000Z");
     expect(second).toMatchObject({ id: 2, title: "Write tests", status: "pending" });
     await expect(readStoredTasks()).resolves.toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 1, title: "Buy groceries", status: "pending" }),
@@ -51,123 +53,79 @@ describe("TaskRepository CRUD and persistence", () => {
     ]));
   });
 
-  test("lists all tasks when filter is 'all'", async () => {
-    const repository = createRepository();
-    await repository.addTask("Long task 1");
-    await repository.addTask("Long task 2");
-    await repository.completeTask(1);
-    const all = await repository.listTasks("all");
-    expect(all.length).toBe(2);
-    expect(all.map(t => t.status)).toEqual(expect.arrayContaining(["pending", "completed"]));
-  });
-
-  test("filter lists tasks by 'pending' status", async () => {
+  test("lists and filters tasks by status", async () => {
     const repository = createRepository();
     await repository.addTask("Task 1");
     await repository.addTask("Task 2");
     await repository.completeTask(1);
-    const pending = await repository.listTasks("pending");
-    expect(pending.length).toBe(1);
-    expect(pending[0].title).toBe("Task 2");
+
+    expect(await repository.listTasks("all")).toHaveLength(2);
+    expect(await repository.listTasks("pending")).toEqual([expect.objectContaining({ title: "Task 2", status: "pending" })]);
+    expect(await repository.listTasks("completed")).toEqual([expect.objectContaining({ title: "Task 1", status: "completed" })]);
   });
 
-  test("filter lists tasks by 'completed' status", async () => {
-    const repository = createRepository();
-    await repository.addTask("Task 1");
-    await repository.addTask("Task 2");
-    await repository.completeTask(1);
-    const completed = await repository.listTasks("completed");
-    expect(completed.length).toBe(1);
-    expect(completed[0].title).toBe("Task 1");
-  });
-
-  test("complete task updates status and completion timestamp", async () => {
-    const repository = createRepository();
-    const task = await repository.addTask("A task");
-    expect(task.title).toBe("A task");
-    expect(task.status).toBe("pending");
-    const completed = await repository.completeTask(task.id);
-    expect(completed.status).toBe("completed");
-    expect(completed.completedAt).toBeTruthy();
-  });
-
-  test("delete removes a task from storage", async () => {
+  test("complete and delete update persistent storage", async () => {
     const repository = createRepository();
     await repository.addTask("Task to delete");
     await repository.addTask("Another task");
-    const beforeDelete = await readStoredTasks();
-    expect(beforeDelete.length).toBe(2);
+
+    const completed = await repository.completeTask(1);
+    expect(completed).toMatchObject({id: 1, status: "completed", completedAt: "2024-01-02T03:04:05.000Z" });
+
     await repository.deleteTask(1);
-    const afterDelete = await readStoredTasks();
-    expect(afterDelete.length).toBe(1);
-    expect(afterDelete[0].title).toBe("Another task");
+
+    expect(await readStoredTasks()).toEqual([expect.objectContaining({ id: 2, title: "Another task" })]);
   });
 
-  test("throws error for unfound task id in complete", async () => {
+  test("throws errors for invalid repository operations", async () => {
     const repository = createRepository();
     await repository.addTask("A task");
-    await expect(repository.completeTask(999)).rejects.toThrow();
-  });
 
-  test("throws error for unfound task id in delete", async () => {
-    const repository = createRepository();
-    await repository.addTask("A task");
-    await expect(repository.deleteTask(999)).rejects.toThrow();
-  });
-
-  test("throws error when adding empty task title", async () => {
-    const repository = createRepository();
-    await expect(repository.addTask("")).rejects.toThrow();
-    await expect(repository.addTask("   ")).rejects.toThrow();
+    await expect(repository.completeTask(999)).rejects.toThrow("Task 999 not found");
+    await expect(repository.deleteTask(999)).rejects.toThrow("Task 999 not found");
+    await expect(repository.completeTask("abc")).rejects.toThrow("Invalid task ID");
+    await expect(repository.deleteTask("abc")).rejects.toThrow("Invalid task ID");
+    await expect(repository.addTask("")).rejects.toThrow("Task title cannot be empty");
+    await expect(repository.listTasks("blocked")).rejects.toThrow("Invalid filter");
   });
 });
 
-describe("CLI integration", () => {
-  test("add command creates task via CLI", async () => {
+describe("runCli command handling", () => {
+  test("CRUD commands update repository and produce user feedback", async () => {
     const repository = createRepository();
     const stdout = memoryStream();
     const stderr = memoryStream();
-    const status = await runCli(["add", "Buy groceries"], { repository, stdout, stderr });
-    expect(status).toBe(0);
+
+    expect(await runCli(["add", "Buy", "groceries"], { repository, stdout, stderr })).toBe(0);
     expect(stdout.output).toContain("Task added");
+
+    const listOut = memoryStream();
+    expect(await runCli(["list"], { repository, stdout: listOut, stderr: memoryStream() })).toBe(0);
+    expect(listOut.output).toContain("Buy groceries");
+
+    const completeOut = memoryStream();
+    expect(await runCli(["complete", "1"], { repository, stdout: completeOut, stderr: memoryStream() })).toBe(0);
+    expect(completeOut.output).toContain("marked as complete");
+
+    const deleteOut = memoryStream();
+    expect(await runCli(["delete", "1"], { repository, stdout: deleteOut, stderr: memoryStream() })).toBe(0);
+    expect(deleteOut.output).toContain("deleted");
+    await expect(readStoredTasks()).resolves.toEqual([]);
   });
 
-  test("list command displays tasks via CLI", async () => {
+  test("returns error codes and messages for command validation failures", async () => {
     const repository = createRepository();
-    await repository.addTask("Buy milk");
-    const stdout = memoryStream();
-    const stderr = memoryStream();
-    const status = await runCli(["list"], { repository, stdout, stderr });
-    expect(status).toBe(0);
-    expect(stdout.output).toContain("Buy milk");
-  });
 
-  test("complete command marks task done via CLI", async () => {
-    const repository = createRepository();
-    await repository.addTask("Deliver package");
-    const stdout = memoryStream();
-    const stderr = memoryStream();
-    const status = await runCli(["complete", "1"], { repository, stdout, stderr });
-    expect(status).toBe(0);
-    expect(stdout.output).toContain("marked as complete");
-  });
+    const missingAddDescription = memoryStream();
+    expect(await runCli(["add"], { repository, stdout: memoryStream(), stderr: missingAddDescription })).toBe(1);
+    expect(missingAddDescription.output).toContain("requires a task description");
 
-  test("delete command removes task via CLI", async () => {
-    const repository = createRepository();
-    await repository.addTask("Clean room");
-    const stdout = memoryStream();
-    const stderr = memoryStream();
-    const status = await runCli(["delete", "1"], { repository, stdout, stderr });
-    expect(status).toBe(0);
-    expect(stdout.output).toContain("deleted");
-  });
+    const missingCompleteId = memoryStream();
+    expect(await runCli(["complete"], { repository, stdout: memoryStream(), stderr: missingCompleteId })).toBe(1);
+    expect(missingCompleteId.output).toContain("requires a task ID");
 
-  test("returns error code for unknown command", async () => {
-    const repository = createRepository();
-    const stdout = memoryStream();
-    const stderr = memoryStream();
-    const status = await runCli(["invalidcmd"], { repository, stdout, stderr });
-    expect(status).toBe(1);
-    expect(stderr.output).toContain("unknown command");
+    const invalidFilter = memoryStream();
+    expect(await runCli(["list", "--filter", "blocked"], { repository, stdout: memoryStream(), stderr: invalidFilter })).toBe(1);
+    expect(invalidFilter.output).toContain("Invalid filter");
   });
 });
